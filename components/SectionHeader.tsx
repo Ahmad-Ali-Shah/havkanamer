@@ -8,12 +8,14 @@ interface SectionHeaderProps {
   title: string;
   /** Short right-aligned hint: a count, a sort order, a unit. */
   meta?: string;
+  /** Interactive right-hand control, used instead of `meta` when the hint is a choice. */
+  action?: React.ReactNode;
   icon?: LucideIcon;
   className?: string;
 }
 
 /** One section title pattern across every screen. */
-export function SectionHeader({ title, meta, icon: Icon, className }: SectionHeaderProps) {
+export function SectionHeader({ title, meta, action, icon: Icon, className }: SectionHeaderProps) {
   const [muted] = useThemeColor(['muted']);
 
   return (
@@ -24,11 +26,12 @@ export function SectionHeader({ title, meta, icon: Icon, className }: SectionHea
           {title}
         </Typography>
       </View>
-      {meta ? (
-        <Typography type="body-xs" color="muted" numberOfLines={1}>
-          {meta}
-        </Typography>
-      ) : null}
+      {action ??
+        (meta ? (
+          <Typography type="body-xs" color="muted" numberOfLines={1}>
+            {meta}
+          </Typography>
+        ) : null)}
     </View>
   );
 }

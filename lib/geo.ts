@@ -95,6 +95,77 @@ export function nearestPointOnPath(path: LatLng[], target: LatLng): NearestPoint
   return best;
 }
 
+/** Distance travelled to reach each point of a path, starting at 0. */
+export function pathCumulativeKm(path: LatLng[]) {
+  const cumulative: number[] = [0];
+  for (let index = 1; index < path.length; index += 1) {
+    cumulative.push(cumulative[index - 1] + distanceKm(path[index - 1], path[index]));
+  }
+  return cumulative;
+}
+
+function lerpCoordinate(from: LatLng, to: LatLng, t: number): LatLng {
+  return {
+    latitude: from.latitude + (to.latitude - from.latitude) * t,
+    longitude: from.longitude + (to.longitude - from.longitude) * t,
+  };
+}
+
+/**
+ * The coordinate a given fraction of the way along a path, measured by distance
+ * rather than by point index so motion along it stays at a constant speed.
+ */
+export function pointAlongPath(path: LatLng[], fraction: number): LatLng {
+  if (path.length === 0) return { latitude: 0, longitude: 0 };
+  if (path.length === 1) return path[0];
+
+  const cumulative = pathCumulativeKm(path);
+  const total = cumulative[cumulative.length - 1];
+  if (total === 0) return path[0];
+
+  const target = Math.max(0, Math.min(1, fraction)) * total;
+
+  for (let index = 1; index < path.length; index += 1) {
+    if (cumulative[index] >= target) {
+      const segment = cumulative[index] - cumulative[index - 1];
+      const t = segment === 0 ? 0 : (target - cumulative[index - 1]) / segment;
+      return lerpCoordinate(path[index - 1], path[index], t);
+    }
+  }
+
+  return path[path.length - 1];
+}
+
+/**
+ * The leading part of a path, ending on an interpolated point. Used to draw a
+ * route onto the map progressively instead of having it appear all at once.
+ */
+export function slicePathTo(path: LatLng[], fraction: number): LatLng[] {
+  if (path.length < 2) return path;
+  if (fraction >= 1) return path;
+  if (fraction <= 0) return [path[0]];
+
+  const cumulative = pathCumulativeKm(path);
+  const total = cumulative[cumulative.length - 1];
+  if (total === 0) return path;
+
+  const target = fraction * total;
+  const output: LatLng[] = [path[0]];
+
+  for (let index = 1; index < path.length; index += 1) {
+    if (cumulative[index] < target) {
+      output.push(path[index]);
+      continue;
+    }
+    const segment = cumulative[index] - cumulative[index - 1];
+    const t = segment === 0 ? 0 : (target - cumulative[index - 1]) / segment;
+    output.push(lerpCoordinate(path[index - 1], path[index], t));
+    break;
+  }
+
+  return output;
+}
+
 /** A map region that comfortably contains every coordinate given. */
 export function regionForCoordinates(coordinates: LatLng[], paddingFactor = 1.45): MapRegion {
   if (coordinates.length === 0) {

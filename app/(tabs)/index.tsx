@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, View } from 'react-native';
+import { FlatList, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
+import { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import {
   LocateFixed,
   MapPinOff,
@@ -18,13 +19,16 @@ import MapView from '@/components/MapView';
 import { EmptyState } from '@/components/EmptyState';
 import { RouteCard } from '@/components/RouteCard';
 import { RouteSearchField } from '@/components/RouteSearchField';
+import { RouteSuggestions } from '@/components/RouteSuggestions';
 import { SectionHeader } from '@/components/SectionHeader';
+import { AnimatedView } from '@/components/ui/primitives/AnimatedView';
 import { LinearGradient } from '@/components/ui/primitives/LinearGradient';
 import { Reveal } from '@/components/ui/Reveal';
 import { Tappable } from '@/components/ui/Tappable';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { describeRoute, matchesQuery } from '@/lib/transport';
 import { formatDistance, regionForRadius } from '@/lib/geo';
+import { buildSuggestions, type Suggestion } from '@/lib/search';
 import {
   HERO_GRADIENT,
   ICON_COLORS,
@@ -37,6 +41,13 @@ import { CONTENT_COLUMN, cn } from '@/lib/utils';
 import type { MapMarker, MapPolyline } from '@/components/MapView.types';
 
 const RADIUS_OPTIONS = [1, 2, 5, 10];
+
+/** How far the header is allowed to settle back as the list scrolls over it. */
+const HEADER_TRAVEL = 160;
+
+/** Row stagger, so each card's route line traces itself as the row lands. */
+const DRAW_STAGGER_MS = 70;
+const MAX_STAGGERED_ROWS = 8;
 
 /**
  * Summary pill that sits on top of the gradient header. The `live` tone picks up
@@ -75,10 +86,32 @@ export default function ExploreScreen() {
   const { status, coordinate, mapCenter, request } = useCurrentLocation();
   const [radiusKm, setRadiusKm] = useState(5);
   const [query, setQuery] = useState('');
+  const [searchFocused, setSearchFocused] = useState(false);
   // The preview map sits inside the list header. Leaving its gestures on means
   // it swallows vertical pans and the list stops scrolling, so panning is only
   // enabled once the passenger explicitly expands the map.
   const [mapExpanded, setMapExpanded] = useState(false);
+
+  // Scroll offset drives the header settle. Written from the scroll event and
+  // read on the UI thread, so the header never re-renders while you drag.
+  const scrollY = useSharedValue(0);
+
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      scrollY.value = event.nativeEvent.contentOffset.y;
+    },
+    [scrollY],
+  );
+
+  // The header lags behind the list and quietly recedes rather than sliding away
+  // at full speed. Anything stronger turns into the parallax the brief warns off.
+  const headerStyle = useAnimatedStyle(() => {
+    const settled = Math.min(Math.max(scrollY.value, 0), HEADER_TRAVEL) / HEADER_TRAVEL;
+    return {
+      transform: [{ translateY: Math.max(scrollY.value, 0) * 0.22 }, { scale: 1 - settled * 0.02 }],
+      opacity: 1 - settled * 0.3,
+    };
+  });
 
   // The header bleeds into the status bar, so its icons have to invert while
   // this screen is the focused one.
@@ -139,6 +172,20 @@ export default function ExploreScreen() {
 
   const region = useMemo(() => regionForRadius(mapCenter, radiusKm), [mapCenter, radiusKm]);
 
+  const suggestions = useMemo(
+    () => (searchFocused ? buildSuggestions(routes, query) : []),
+    [routes, query, searchFocused],
+  );
+
+  const applySuggestion = useCallback((suggestion: Suggestion) => {
+    setQuery(suggestion.query);
+    setSearchFocused(false);
+
+    if (suggestion.routeId) {
+      router.push({ pathname: '/route/[id]', params: { id: suggestion.routeId } });
+    }
+  }, []);
+
   return (
     <View className="bg-background flex-1">
       <FlatList
@@ -146,59 +193,67 @@ export default function ExploreScreen() {
         keyExtractor={(item) => item.route.id}
         contentContainerClassName={cn('gap-3 pb-10', CONTENT_COLUMN)}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
         // Without this the first tap after typing is swallowed to dismiss the
         // keyboard, so cards and buttons appear to ignore the press.
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         ListHeaderComponent={
           <View className="gap-4">
-            <LinearGradient
-              colors={HERO_GRADIENT}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              className="pt-safe-offset-4 gap-4 rounded-b-[32px] px-4 pb-6"
-            >
-              <View className="gap-1">
-                <View className="flex-row items-center gap-1.5">
-                  <Radar color={ICON_COLORS.onBrandMint} size={14} />
-                  <Typography
-                    type="body-xs"
-                    weight="semibold"
-                    className="tracking-wide text-white uppercase"
-                  >
-                    Transport near you
+            <AnimatedView style={headerStyle}>
+              <LinearGradient
+                colors={HERO_GRADIENT}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="pt-safe-offset-4 gap-4 rounded-b-[32px] px-4 pb-6"
+              >
+                <View className="gap-1">
+                  <View className="flex-row items-center gap-1.5">
+                    <Radar color={ICON_COLORS.onBrandMint} size={14} />
+                    <Typography
+                      type="body-xs"
+                      weight="semibold"
+                      className="tracking-wide text-white uppercase"
+                    >
+                      Transport near you
+                    </Typography>
+                  </View>
+                  <Typography type="h3" className="text-white">
+                    Where are you going?
                   </Typography>
                 </View>
-                <Typography type="h3" className="text-white">
-                  Where are you going?
-                </Typography>
-              </View>
 
-              <RouteSearchField
-                value={query}
-                onChange={setQuery}
-                placeholder="Sector, stop or landmark"
-                className="bg-background"
-              />
+                <RouteSearchField
+                  value={query}
+                  onChange={setQuery}
+                  placeholder="Sector, stop or landmark"
+                  focusedPlaceholder="Where to? Sector, stop or landmark"
+                  className="bg-background"
+                  onFocusChange={setSearchFocused}
+                />
 
-              <View className="flex-row flex-wrap items-center gap-2">
-                <Reveal distance={0} delay={80}>
-                  <HeroStat icon={Zap} label={`${runningNow} vehicles running`} tone="live" />
-                </Reveal>
-                <Reveal distance={0} delay={140}>
-                  <HeroStat
-                    icon={RouteIcon}
-                    label={
-                      coordinate
-                        ? `${nearby.length} routes within ${radiusKm} km`
-                        : `${nearby.length} routes published`
-                    }
-                  />
-                </Reveal>
-              </View>
-            </LinearGradient>
+                <View className="flex-row flex-wrap items-center gap-2">
+                  <Reveal distance={0} delay={80}>
+                    <HeroStat icon={Zap} label={`${runningNow} vehicles running`} tone="live" />
+                  </Reveal>
+                  <Reveal distance={0} delay={140}>
+                    <HeroStat
+                      icon={RouteIcon}
+                      label={
+                        coordinate
+                          ? `${nearby.length} routes within ${radiusKm} km`
+                          : `${nearby.length} routes published`
+                      }
+                    />
+                  </Reveal>
+                </View>
+              </LinearGradient>
+            </AnimatedView>
 
             <View className="gap-4 px-4">
+              <RouteSuggestions suggestions={suggestions} onSelect={applySuggestion} />
+
               <View className="border-border bg-surface-secondary overflow-hidden rounded-3xl border">
                 <MapView
                   style={{ width: '100%', height: mapExpanded ? 340 : 232 }}
@@ -335,10 +390,11 @@ export default function ExploreScreen() {
           </View>
         }
         renderItem={({ item, index }) => (
-          <Reveal index={index} className="px-4">
+          <Reveal index={index} animateLayout className="px-4">
             <RouteCard
               item={item}
               showAccessDistance={coordinate !== null}
+              drawDelay={Math.min(index, MAX_STAGGERED_ROWS) * DRAW_STAGGER_MS}
               onPress={() =>
                 router.push({ pathname: '/route/[id]', params: { id: item.route.id } })
               }
@@ -349,8 +405,8 @@ export default function ExploreScreen() {
           query.trim().length > 0 ? (
             <EmptyState
               icon={SearchX}
-              title="No route matches that"
-              description="Try a sector or landmark name, or clear the search to see everything nearby."
+              title="No routes found"
+              description="Try another sector or stop, or clear the search to see everything nearby."
               actionLabel="Clear search"
               onAction={() => setQuery('')}
             />

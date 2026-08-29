@@ -1,14 +1,18 @@
 import type { ViewStyle } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, LinearTransition } from 'react-native-reanimated';
 import { withUniwind } from 'uniwind';
+
+import { MOTION_DURATION } from '@/lib/motion';
 
 const AnimatedView = withUniwind(Animated.View);
 
 /** Entrance timing shared by every revealed surface, so nothing feels sluggish. */
-const DURATION = 260;
+const DURATION = MOTION_DURATION.enter;
 const STAGGER = 45;
 /** Beyond this the stagger stops compounding or late items feel broken. */
 const MAX_STAGGER_STEPS = 8;
+
+const LAYOUT_TRANSITION = LinearTransition.duration(MOTION_DURATION.layout);
 
 interface RevealProps {
   children: React.ReactNode;
@@ -18,6 +22,11 @@ interface RevealProps {
   delay?: number;
   /** Slide distance. 0 fades in place. */
   distance?: number;
+  /**
+   * Animate this item to its new position when the list around it changes, so
+   * filtering and re-sorting slide instead of snapping.
+   */
+  animateLayout?: boolean;
   className?: string;
   style?: ViewStyle;
 }
@@ -31,6 +40,7 @@ export function Reveal({
   index = 0,
   delay = 0,
   distance = 12,
+  animateLayout = false,
   className,
   style,
 }: RevealProps) {
@@ -46,7 +56,12 @@ export function Reveal({
           });
 
   return (
-    <AnimatedView entering={entering} className={className} style={style}>
+    <AnimatedView
+      entering={entering}
+      layout={animateLayout ? LAYOUT_TRANSITION : undefined}
+      className={className}
+      style={style}
+    >
       {children}
     </AnimatedView>
   );

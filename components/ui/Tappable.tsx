@@ -6,17 +6,17 @@ import {
   useSharedValue,
   withSpring,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { withUniwind } from 'uniwind';
 
 import { tapFeedback, type HapticStrength } from '@/lib/haptics';
+import { MOTION_DURATION, SPRING_SNAP } from '@/lib/motion';
 
 const AnimatedPressable = withUniwind(createAnimatedComponent(Pressable));
 
 /** Generous default so small controls still clear the 44px comfortable target. */
 const DEFAULT_HIT_SLOP = 10;
-
-const PRESS_SPRING = { damping: 18, stiffness: 320, mass: 0.5 } as const;
 
 export interface TappableProps extends Omit<PressableProps, 'style' | 'children'> {
   children: React.ReactNode;
@@ -26,7 +26,16 @@ export interface TappableProps extends Omit<PressableProps, 'style' | 'children'
   pressedScale?: number;
   /** Opacity while held. */
   pressedOpacity?: number;
+  /** Pixels the surface rises while held, for a card that should feel picked up. */
+  pressedLift?: number;
   haptic?: HapticStrength | false;
+  /**
+   * Optional shared value mirroring the press state, 0 → 1. Pass one in when a
+   * child needs to react to the press too — a chevron sliding towards the edge,
+   * a route line brightening — so the whole card responds as one gesture
+   * instead of each part animating on its own clock.
+   */
+  progress?: SharedValue<number>;
 }
 
 /**
@@ -43,24 +52,30 @@ export function Tappable({
   style,
   pressedScale = 0.97,
   pressedOpacity = 0.9,
+  pressedLift = 0,
   haptic = 'light',
   hitSlop = DEFAULT_HIT_SLOP,
   onPress,
   onPressIn,
   onPressOut,
   disabled,
+  progress,
   ...rest
 }: TappableProps) {
-  const pressed = useSharedValue(0);
+  const internalProgress = useSharedValue(0);
+  const pressed = progress ?? internalProgress;
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 - pressed.value * (1 - pressedScale) }],
+    transform: [
+      { scale: 1 - pressed.value * (1 - pressedScale) },
+      { translateY: -pressed.value * pressedLift },
+    ],
     opacity: 1 - pressed.value * (1 - pressedOpacity),
   }));
 
   const handlePressIn = useCallback<NonNullable<PressableProps['onPressIn']>>(
     (event) => {
-      pressed.value = withSpring(1, PRESS_SPRING);
+      pressed.value = withSpring(1, SPRING_SNAP);
       onPressIn?.(event);
     },
     [onPressIn, pressed],
@@ -68,7 +83,7 @@ export function Tappable({
 
   const handlePressOut = useCallback<NonNullable<PressableProps['onPressOut']>>(
     (event) => {
-      pressed.value = withTiming(0, { duration: 180 });
+      pressed.value = withTiming(0, { duration: MOTION_DURATION.press });
       onPressOut?.(event);
     },
     [onPressOut, pressed],

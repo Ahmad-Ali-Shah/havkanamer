@@ -1,7 +1,17 @@
+import { useEffect } from 'react';
 import type { LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
+import {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import { Button, Typography, useThemeColor } from 'heroui-native';
 
+import { AnimatedView } from '@/components/ui/primitives/AnimatedView';
 import { Reveal } from '@/components/ui/Reveal';
 
 interface EmptyStateProps {
@@ -24,13 +34,31 @@ export function EmptyState({
   onSecondaryAction,
 }: EmptyStateProps) {
   const [accent] = useThemeColor(['accent']);
+  const float = useSharedValue(0);
+
+  // A dead end still needs a pulse, or the screen reads as a failed load.
+  useEffect(() => {
+    float.value = withRepeat(
+      withTiming(1, { duration: 2400, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true,
+    );
+    return () => cancelAnimation(float);
+  }, [float]);
+
+  const floatStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: -float.value * 4 }],
+  }));
 
   return (
     <View className="items-center gap-3 px-6 py-10">
       <Reveal distance={0}>
-        <View className="bg-route-surface h-16 w-16 items-center justify-center rounded-3xl">
+        <AnimatedView
+          className="bg-route-surface h-16 w-16 items-center justify-center rounded-3xl"
+          style={floatStyle}
+        >
           <Icon color={accent} size={28} />
-        </View>
+        </AnimatedView>
       </Reveal>
       <Reveal delay={60}>
         <Typography type="h5" align="center">

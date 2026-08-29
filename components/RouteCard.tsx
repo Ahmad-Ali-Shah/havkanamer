@@ -1,11 +1,13 @@
 import { Clock, ChevronRight, Footprints, Wallet } from 'lucide-react-native';
 import { View } from 'react-native';
+import { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { Typography, useThemeColor } from 'heroui-native';
 
 import { CategoryTile } from '@/components/CategoryTile';
 import { IconStat } from '@/components/Stat';
 import { RoutePathPreview } from '@/components/RoutePathPreview';
 import { StatusBadge } from '@/components/StatusBadge';
+import { AnimatedView } from '@/components/ui/primitives/AnimatedView';
 import { Tappable } from '@/components/ui/Tappable';
 import { ICON_COLORS } from '@/lib/mapTheme';
 import { formatDistance, formatDuration, formatFare } from '@/lib/geo';
@@ -17,12 +19,28 @@ interface RouteCardProps {
   onPress: () => void;
   /** Hidden when the passenger's location is unknown. */
   showAccessDistance?: boolean;
+  /** Milliseconds before the route line traces itself, to match the row stagger. */
+  drawDelay?: number;
 }
 
-export function RouteCard({ item, onPress, showAccessDistance = true }: RouteCardProps) {
+export function RouteCard({
+  item,
+  onPress,
+  showAccessDistance = true,
+  drawDelay = 0,
+}: RouteCardProps) {
   const [muted] = useThemeColor(['muted']);
   const { route } = item;
   const isLive = item.activeVendorCount > 0;
+
+  // One press value for the whole card, so the lift, the chevron and the route
+  // graphic all move as a single gesture rather than three separate animations.
+  const press = useSharedValue(0);
+
+  const chevronStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: press.value * 4 }],
+    opacity: 0.85 + press.value * 0.15,
+  }));
 
   // The route name already spells out the corridor, so the subtitle carries
   // what the name cannot: the vehicle type and how it stops.
@@ -36,6 +54,8 @@ export function RouteCard({ item, onPress, showAccessDistance = true }: RouteCar
       onPress={onPress}
       accessibilityLabel={`${route.name}. ${subtitle}. Open route details.`}
       pressedScale={0.975}
+      pressedLift={2}
+      progress={press}
       className="border-border bg-surface gap-3 rounded-3xl border p-4"
     >
       <View className="flex-row items-center gap-3">
@@ -50,10 +70,19 @@ export function RouteCard({ item, onPress, showAccessDistance = true }: RouteCar
           </Typography>
         </View>
 
-        <RoutePathPreview path={route.path} muted={!isLive} className="w-14" />
+        <RoutePathPreview
+          path={route.path}
+          muted={!isLive}
+          live={isLive}
+          drawDelay={drawDelay}
+          emphasis={press}
+        />
 
-        {/* Affordance: makes it obvious the whole card opens something. */}
-        <ChevronRight color={muted} size={18} />
+        {/* Affordance: makes it obvious the whole card opens something, and it
+            leans towards the edge while held so the press is acknowledged. */}
+        <AnimatedView style={chevronStyle}>
+          <ChevronRight color={muted} size={18} />
+        </AnimatedView>
       </View>
 
       <View className="flex-row flex-wrap items-center gap-x-3 gap-y-2">
