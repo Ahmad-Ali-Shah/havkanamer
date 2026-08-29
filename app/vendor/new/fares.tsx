@@ -9,6 +9,7 @@ import { tapFeedback } from '@/lib/haptics';
 import { categoryLabel } from '@/lib/types';
 import { useRouteDraftStore } from '@/lib/routeDraft';
 import { useSessionStore, useTransportStore } from '@/lib/store';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 import type { FareSlab } from '@/lib/types';
 
 export default function FaresScreen() {
@@ -77,7 +78,10 @@ export default function FaresScreen() {
       className="bg-background flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerClassName="gap-5 p-4 pb-6" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerClassName={cn('gap-5 p-4 pb-6', CONTENT_COLUMN)}
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="gap-1">
           <Typography type="body-xs" color="muted">
             {draft.mode === 'join' ? 'Step 2 of 2' : 'Step 4 of 4'}

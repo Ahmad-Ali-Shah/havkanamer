@@ -5,6 +5,7 @@ import { Button, Description, Input, Label, Surface, TextField, Typography } fro
 
 import { useRouteDraftStore } from '@/lib/routeDraft';
 import { useTransportStore } from '@/lib/store';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 
 export default function VehicleDetailsScreen() {
   const draft = useRouteDraftStore();
@@ -44,7 +45,10 @@ export default function VehicleDetailsScreen() {
       className="bg-background flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerClassName="gap-5 p-4 pb-6" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerClassName={cn('gap-5 p-4 pb-6', CONTENT_COLUMN)}
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="gap-1">
           <Typography type="body-xs" color="muted">
             {draft.mode === 'join' ? 'Step 1 of 2' : 'Step 3 of 4'}

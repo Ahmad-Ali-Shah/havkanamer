@@ -15,6 +15,7 @@ import { ICON_COLORS, MAP_COLORS } from '@/lib/mapTheme';
 import { directionLabel, directionPath } from '@/lib/types';
 import { findActiveJourneyForRegistration } from '@/lib/transport';
 import { useTransportStore } from '@/lib/store';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 import type { RouteDirection } from '@/lib/types';
 
 export default function JourneyScreen() {
@@ -53,7 +54,10 @@ export default function JourneyScreen() {
   const path = directionPath(route, shownDirection);
 
   return (
-    <ScrollView className="bg-background flex-1" contentContainerClassName="gap-5 p-4 pb-10">
+    <ScrollView
+      className="bg-background flex-1"
+      contentContainerClassName={cn('gap-5 p-4 pb-10', CONTENT_COLUMN)}
+    >
       <Stack.Screen options={{ title: activeJourney ? 'Active journey' : 'Start journey' }} />
 
       <View className="gap-1">

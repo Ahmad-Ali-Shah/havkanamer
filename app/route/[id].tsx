@@ -30,7 +30,7 @@ import { vendorsForRoute } from '@/lib/transport';
 import { categoryLabel, directionPath, directionStops } from '@/lib/types';
 import { useRouteDraftStore } from '@/lib/routeDraft';
 import { useSessionStore, useTransportStore } from '@/lib/store';
-import { cn } from '@/lib/utils';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 import type { MapMarker } from '@/components/MapView.types';
 import type { RouteDirection } from '@/lib/types';
 
@@ -129,7 +129,7 @@ export default function RouteDetailScreen() {
   return (
     <ScrollView
       className="bg-background flex-1"
-      contentContainerClassName="gap-5 p-4 pb-12"
+      contentContainerClassName={cn('gap-5 p-4 pb-12', CONTENT_COLUMN)}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >

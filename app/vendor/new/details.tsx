@@ -7,6 +7,7 @@ import { ChoiceRow } from '@/components/ChoiceRow';
 import { formatDistance, pathLengthKm } from '@/lib/geo';
 import { CATEGORY_OPTIONS } from '@/lib/categories';
 import { useRouteDraftStore } from '@/lib/routeDraft';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 import type { DirectionType, RouteCategory, StopType } from '@/lib/types';
 
 const DIRECTION_OPTIONS: { value: DirectionType; label: string }[] = [
@@ -52,7 +53,10 @@ export default function RouteDetailsScreen() {
       className="bg-background flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerClassName="gap-5 p-4 pb-6" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerClassName={cn('gap-5 p-4 pb-6', CONTENT_COLUMN)}
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="gap-1">
           <Typography type="body-xs" color="muted">
             Step 2 of 4

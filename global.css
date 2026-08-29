@@ -6,46 +6,57 @@
 @import 'heroui-native/styles';
 
 /*
- * Local Transport Discovery — brand + status tokens.
+ * Local Transport Discovery — green + blue duotone.
  *
- * Brand accent is a vivid azure that stays legible on top of map tiles and
- * carries the gradient header. Journey status uses its own live / idle scale so
- * that "running right now" is never confused with "brand coloured", and fare
- * uses a warm scale so money never reads as a status.
+ * The brand is two hues doing two jobs, never swapped:
+ *   BLUE  (--accent, --color-route) = the network. Routes, navigation, primary
+ *         actions, selected states. It is the colour you press.
+ *   GREEN (--color-live)            = motion. A vehicle running right now, a
+ *         journey in progress, the boarding end of a path. It is the colour you
+ *         catch.
+ * Both sit at the same lightness and chroma so they read as one family, and the
+ * Explore header gradient runs green -> teal -> blue to show them as a pair.
+ *
+ * Money is deliberately outside the brand: --color-fare is warm amber so a
+ * price can never be mistaken for a status or a tappable thing.
  */
 @layer theme {
   :root {
     @variant light {
-      --accent: oklch(0.52 0.16 254);
+      --accent: oklch(0.52 0.115 235);
       --accent-foreground: oklch(0.99 0 0);
       --focus: var(--accent);
     }
 
     @variant dark {
-      --accent: oklch(0.66 0.14 254);
-      --accent-foreground: oklch(0.15 0.03 254);
+      --accent: oklch(0.7 0.1 235);
+      --accent-foreground: oklch(0.16 0.03 235);
       --focus: var(--accent);
     }
   }
 }
 
 @theme {
-  --color-live: oklch(0.55 0.15 152);
+  /* Green half — running now, journey in progress, boarding point. */
+  --color-live: oklch(0.53 0.125 163);
   --color-live-foreground: oklch(0.99 0 0);
-  --color-live-surface: oklch(0.955 0.045 152);
-  --color-live-border: oklch(0.85 0.08 152);
+  --color-live-surface: oklch(0.955 0.042 163);
+  --color-live-border: oklch(0.85 0.075 163);
 
-  --color-idle: oklch(0.52 0.014 254);
-  --color-idle-surface: oklch(0.965 0.004 254);
-  --color-idle-border: oklch(0.9 0.006 254);
+  /* Blue half — the route network itself. Same hue as --accent. */
+  --color-route: oklch(0.52 0.115 235);
+  --color-route-surface: oklch(0.955 0.03 235);
+  --color-route-border: oklch(0.88 0.05 235);
 
+  /* Nobody running: desaturated to the blue hue so grey never looks foreign. */
+  --color-idle: oklch(0.52 0.014 235);
+  --color-idle-surface: oklch(0.965 0.004 235);
+  --color-idle-border: oklch(0.9 0.006 235);
+
+  /* Fare — warm, outside the brand on purpose. */
   --color-fare: oklch(0.5 0.105 62);
   --color-fare-surface: oklch(0.965 0.04 78);
   --color-fare-border: oklch(0.88 0.07 78);
-
-  --color-route: oklch(0.52 0.16 254);
-  --color-route-surface: oklch(0.955 0.03 254);
-  --color-route-border: oklch(0.88 0.05 254);
 }
 
 @source './node_modules/heroui-native/lib';

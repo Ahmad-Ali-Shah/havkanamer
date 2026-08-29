@@ -23,6 +23,7 @@ import { tapFeedback } from '@/lib/haptics';
 import { categoryLabel, directionLabel } from '@/lib/types';
 import { findActiveJourneyForRegistration } from '@/lib/transport';
 import { useTransportStore } from '@/lib/store';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 import type { FareSlab } from '@/lib/types';
 
 export default function ManageRegistrationScreen() {
@@ -86,7 +87,10 @@ export default function ManageRegistrationScreen() {
       className="bg-background flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerClassName="gap-5 p-4 pb-10" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerClassName={cn('gap-5 p-4 pb-10', CONTENT_COLUMN)}
+        keyboardShouldPersistTaps="handled"
+      >
         <Stack.Screen options={{ title: registration.vehicleRegistration }} />
 
         <View className="gap-2">

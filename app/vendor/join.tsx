@@ -11,6 +11,7 @@ import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { describeRoute, matchesQuery } from '@/lib/transport';
 import { useRouteDraftStore } from '@/lib/routeDraft';
 import { useSessionStore, useTransportStore } from '@/lib/store';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 
 export default function JoinRouteScreen() {
   const routes = useTransportStore((state) => state.routes);
@@ -42,7 +43,7 @@ export default function JoinRouteScreen() {
   return (
     <ScrollView
       className="bg-background flex-1"
-      contentContainerClassName="gap-4 p-4 pb-10"
+      contentContainerClassName={cn('gap-4 p-4 pb-10', CONTENT_COLUMN)}
       keyboardShouldPersistTaps="handled"
     >
       <View className="gap-1">

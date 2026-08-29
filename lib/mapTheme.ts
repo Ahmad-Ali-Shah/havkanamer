@@ -1,18 +1,26 @@
 /**
- * Map overlays are native props, so they need React Native parseable colours
- * rather than the oklch() values used by className tokens. These hexes mirror
- * the palette defined in global.css.
+ * Map overlays and icon props are native props, so they need React Native
+ * parseable colours rather than the oklch() values used by className tokens.
+ * Every hex here mirrors a token in global.css — change the token first, then
+ * the hex, so the two halves of the duotone stay in step.
  */
+
+/** Blue half of the duotone — mirrors --accent / --color-route. */
+const BRAND_BLUE = '#0F6BB5';
+/** Green half of the duotone — mirrors --color-live. */
+const BRAND_GREEN = '#0E8A63';
+
 export const MAP_COLORS = {
-  route: '#1F5FD0',
+  route: BRAND_BLUE,
   routeMuted: '#94A3B8',
   routeDraft: '#EA7317',
-  radiusFill: 'rgba(31, 95, 208, 0.09)',
-  radiusStroke: 'rgba(31, 95, 208, 0.42)',
-  start: '#16A34A',
+  radiusFill: 'rgba(15, 107, 181, 0.10)',
+  radiusStroke: 'rgba(15, 107, 181, 0.42)',
+  /** Boarding end of a path — green, because that is where you get moving. */
+  start: BRAND_GREEN,
   end: '#DC2626',
   stop: '#F59E0B',
-  user: '#1F5FD0',
+  user: BRAND_BLUE,
 } as const;
 
 /**
@@ -20,16 +28,25 @@ export const MAP_COLORS = {
  * mirror --color-live, --color-fare and the danger foreground in global.css.
  */
 export const ICON_COLORS = {
-  live: '#16A34A',
+  live: BRAND_GREEN,
   danger: '#B91C1C',
   fare: '#8A5A17',
   onBrand: '#FFFFFF',
+  /** Mint, for icons sitting on top of the gradient header. */
+  onBrandMint: '#8FEFC9',
 } as const;
 
-/** Gradient stops for the Explore header, shading down from the brand accent. */
-export const HERO_GRADIENT = ['#123F94', '#1B58C0', '#2F7CD6'] as const;
+/**
+ * Explore header gradient: green (top-left) through teal into blue
+ * (bottom-right), so the two brand hues are introduced together. All three
+ * stops are dark enough to clear AA contrast against white text.
+ */
+export const HERO_GRADIENT = ['#0C6B4C', '#0B6B74', '#12529B'] as const;
 
-/** Translucent white layers used on top of the gradient header. */
+/** Translucent white layer used on top of the gradient header. */
 export const ON_BRAND_SURFACE = 'rgba(255, 255, 255, 0.16)';
+
+/** Mint-tinted layer for the "running now" pill on the gradient header. */
+export const ON_BRAND_LIVE_SURFACE = 'rgba(143, 239, 201, 0.22)';
 
 export const ISLAMABAD_CENTER = { latitude: 33.6844, longitude: 73.0479 };

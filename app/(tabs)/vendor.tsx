@@ -14,6 +14,7 @@ import { directionLabel } from '@/lib/types';
 import { findActiveJourneyForRegistration, registrationsForAccount } from '@/lib/transport';
 import { useSessionStore, useTransportStore } from '@/lib/store';
 import { useRouteDraftStore } from '@/lib/routeDraft';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 
 export default function VendorScreen() {
   const [accent, muted] = useThemeColor(['accent', 'muted']);
@@ -25,7 +26,10 @@ export default function VendorScreen() {
 
   if (!account) {
     return (
-      <ScrollView className="bg-background flex-1" contentContainerClassName="gap-5 p-4">
+      <ScrollView
+        className="bg-background flex-1"
+        contentContainerClassName={cn('gap-5 p-4', CONTENT_COLUMN)}
+      >
         <Card>
           <Card.Body className="gap-3 p-0">
             <View className="bg-route-surface h-12 w-12 items-center justify-center rounded-2xl">
@@ -70,7 +74,10 @@ export default function VendorScreen() {
   const myRegistrations = registrationsForAccount(registrations, account.id);
 
   return (
-    <ScrollView className="bg-background flex-1" contentContainerClassName="gap-5 p-4 pb-10">
+    <ScrollView
+      className="bg-background flex-1"
+      contentContainerClassName={cn('gap-5 p-4 pb-10', CONTENT_COLUMN)}
+    >
       <View className="gap-1">
         <Typography type="body-sm" color="muted">
           Signed in as

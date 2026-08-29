@@ -15,6 +15,7 @@ import { CATEGORY_OPTIONS } from '@/lib/categories';
 import { tapFeedback } from '@/lib/haptics';
 import { ICON_COLORS } from '@/lib/mapTheme';
 import { useTransportStore } from '@/lib/store';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 import type { RouteCategory } from '@/lib/types';
 
 type CategoryFilter = RouteCategory | 'all';
@@ -49,7 +50,7 @@ export default function RoutesScreen() {
       <FlatList
         data={items}
         keyExtractor={(item) => item.route.id}
-        contentContainerClassName="gap-3 px-4 pb-10"
+        contentContainerClassName={cn('gap-3 px-4 pb-10', CONTENT_COLUMN)}
         showsVerticalScrollIndicator={false}
         // Without this the first tap after typing is swallowed to dismiss the
         // keyboard, so cards and chips appear to ignore the press.

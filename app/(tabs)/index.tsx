@@ -25,21 +25,41 @@ import { Tappable } from '@/components/ui/Tappable';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { describeRoute, matchesQuery } from '@/lib/transport';
 import { formatDistance, regionForRadius } from '@/lib/geo';
-import { HERO_GRADIENT, ICON_COLORS, MAP_COLORS, ON_BRAND_SURFACE } from '@/lib/mapTheme';
+import {
+  HERO_GRADIENT,
+  ICON_COLORS,
+  MAP_COLORS,
+  ON_BRAND_LIVE_SURFACE,
+  ON_BRAND_SURFACE,
+} from '@/lib/mapTheme';
 import { useTransportStore } from '@/lib/store';
-import { cn } from '@/lib/utils';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 import type { MapMarker, MapPolyline } from '@/components/MapView.types';
 
 const RADIUS_OPTIONS = [1, 2, 5, 10];
 
-/** Summary pill that sits on top of the gradient header. */
-function HeroStat({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
+/**
+ * Summary pill that sits on top of the gradient header. The `live` tone picks up
+ * the green half of the brand, so "vehicles running" is green here for the same
+ * reason it is green on every route card.
+ */
+function HeroStat({
+  icon: Icon,
+  label,
+  tone = 'neutral',
+}: {
+  icon: LucideIcon;
+  label: string;
+  tone?: 'neutral' | 'live';
+}) {
+  const isLive = tone === 'live';
+
   return (
     <View
       className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
-      style={{ backgroundColor: ON_BRAND_SURFACE }}
+      style={{ backgroundColor: isLive ? ON_BRAND_LIVE_SURFACE : ON_BRAND_SURFACE }}
     >
-      <Icon color={ICON_COLORS.onBrand} size={13} />
+      <Icon color={isLive ? ICON_COLORS.onBrandMint : ICON_COLORS.onBrand} size={13} />
       <Typography type="body-xs" weight="semibold" className="text-white">
         {label}
       </Typography>
@@ -124,7 +144,7 @@ export default function ExploreScreen() {
       <FlatList
         data={nearby}
         keyExtractor={(item) => item.route.id}
-        contentContainerClassName="gap-3 pb-10"
+        contentContainerClassName={cn('gap-3 pb-10', CONTENT_COLUMN)}
         showsVerticalScrollIndicator={false}
         // Without this the first tap after typing is swallowed to dismiss the
         // keyboard, so cards and buttons appear to ignore the press.
@@ -140,7 +160,7 @@ export default function ExploreScreen() {
             >
               <View className="gap-1">
                 <View className="flex-row items-center gap-1.5">
-                  <Radar color={ICON_COLORS.onBrand} size={14} />
+                  <Radar color={ICON_COLORS.onBrandMint} size={14} />
                   <Typography
                     type="body-xs"
                     weight="semibold"
@@ -163,7 +183,7 @@ export default function ExploreScreen() {
 
               <View className="flex-row flex-wrap items-center gap-2">
                 <Reveal distance={0} delay={80}>
-                  <HeroStat icon={Zap} label={`${runningNow} vehicles running`} />
+                  <HeroStat icon={Zap} label={`${runningNow} vehicles running`} tone="live" />
                 </Reveal>
                 <Reveal distance={0} delay={140}>
                   <HeroStat

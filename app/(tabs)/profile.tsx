@@ -10,6 +10,7 @@ import { tapFeedback } from '@/lib/haptics';
 import { ICON_COLORS } from '@/lib/mapTheme';
 import { registrationsForAccount } from '@/lib/transport';
 import { useSessionStore, useTransportStore } from '@/lib/store';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 
 export default function ProfileScreen() {
   const [accent] = useThemeColor(['accent']);
@@ -33,7 +34,10 @@ export default function ProfileScreen() {
     : [];
 
   return (
-    <ScrollView className="bg-background flex-1" contentContainerClassName="gap-5 p-4 pb-10">
+    <ScrollView
+      className="bg-background flex-1"
+      contentContainerClassName={cn('gap-5 p-4 pb-10', CONTENT_COLUMN)}
+    >
       <Card>
         <Card.Body className="gap-3 p-0">
           <View className="flex-row items-center gap-3">

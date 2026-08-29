@@ -14,6 +14,7 @@ import {
 import { goBackOrReplace } from '@/lib/navigation';
 import { tapFeedback } from '@/lib/haptics';
 import { useSessionStore } from '@/lib/store';
+import { CONTENT_COLUMN, cn } from '@/lib/utils';
 
 export default function VendorSignInScreen() {
   const [accent] = useThemeColor(['accent']);
@@ -42,7 +43,10 @@ export default function VendorSignInScreen() {
       className="bg-background flex-1"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerClassName="gap-6 p-4" keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerClassName={cn('gap-6 p-4', CONTENT_COLUMN)}
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="gap-2">
           <View className="bg-route-surface h-12 w-12 items-center justify-center rounded-2xl">
             <BusFront color={accent} size={24} />
