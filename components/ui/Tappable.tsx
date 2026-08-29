@@ -65,17 +65,20 @@ export function Tappable({
   const internalProgress = useSharedValue(0);
   const pressed = progress ?? internalProgress;
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: 1 - pressed.value * (1 - pressedScale) },
-      { translateY: -pressed.value * pressedLift },
-    ],
-    opacity: 1 - pressed.value * (1 - pressedOpacity),
-  }));
+  const animatedStyle = useAnimatedStyle(() => {
+    const value = pressed.get();
+    return {
+      transform: [{ scale: 1 - value * (1 - pressedScale) }, { translateY: -value * pressedLift }],
+      opacity: 1 - value * (1 - pressedOpacity),
+    };
+  });
 
+  // `.set()` rather than assigning to `.value`: the shared value may come from a
+  // prop, and writing through that alias reads as mutating someone else's return
+  // value, which the React Compiler rejects.
   const handlePressIn = useCallback<NonNullable<PressableProps['onPressIn']>>(
     (event) => {
-      pressed.value = withSpring(1, SPRING_SNAP);
+      pressed.set(withSpring(1, SPRING_SNAP));
       onPressIn?.(event);
     },
     [onPressIn, pressed],
@@ -83,7 +86,7 @@ export function Tappable({
 
   const handlePressOut = useCallback<NonNullable<PressableProps['onPressOut']>>(
     (event) => {
-      pressed.value = withTiming(0, { duration: MOTION_DURATION.press });
+      pressed.set(withTiming(0, { duration: MOTION_DURATION.press }));
       onPressOut?.(event);
     },
     [onPressOut, pressed],

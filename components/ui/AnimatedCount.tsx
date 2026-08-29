@@ -66,8 +66,7 @@ export function AnimatedCount({
 
     const interval = setInterval(() => {
       step += 1;
-      const next =
-        step >= steps ? value : from + direction * Math.round((distance * step) / steps);
+      const next = step >= steps ? value : from + direction * Math.round((distance * step) / steps);
       setDisplayed(next);
       roll.value = direction > 0 ? -1 : 1;
       roll.value = withTiming(0, { duration: MOTION_DURATION.press });
@@ -94,10 +93,7 @@ export function AnimatedCount({
   }, [emphasis, pulse]);
 
   const numberStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: roll.value * 7 },
-      { scale: 1 + pulse.value * 0.04 },
-    ],
+    transform: [{ translateY: roll.value * 7 }, { scale: 1 + pulse.value * 0.04 }],
     opacity: 1 - Math.abs(roll.value) * 0.5,
   }));
 

@@ -62,11 +62,13 @@ function project(path: LatLng[], scale: number, offsetY: number): Point[] {
   const spanLon = Math.max(maxLon - minLon, 1e-6);
 
   return path.map((point) => ({
-    x: (BASE_PADDING + ((point.longitude - minLon) / spanLon) * (BASE_WIDTH - BASE_PADDING * 2)) *
+    x:
+      (BASE_PADDING + ((point.longitude - minLon) / spanLon) * (BASE_WIDTH - BASE_PADDING * 2)) *
       scale,
     // SVG y grows downwards while latitude grows upwards.
     y:
-      (BASE_PADDING + (1 - (point.latitude - minLat) / spanLat) * (BASE_HEIGHT - BASE_PADDING * 2)) *
+      (BASE_PADDING +
+        (1 - (point.latitude - minLat) / spanLat) * (BASE_HEIGHT - BASE_PADDING * 2)) *
         scale +
       offsetY,
   }));

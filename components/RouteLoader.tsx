@@ -80,7 +80,10 @@ export function RouteLoader({
 
           <View className="absolute w-full flex-row justify-between">
             {Array.from({ length: STOP_COUNT }, (_, index) => (
-              <View key={index} className="border-accent bg-background h-2 w-2 rounded-full border" />
+              <View
+                key={index}
+                className="border-accent bg-background h-2 w-2 rounded-full border"
+              />
             ))}
           </View>
         </View>

@@ -11,7 +11,7 @@ import {
 } from '@expo-google-fonts/inter';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform, View } from 'react-native';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import * as DevClient from 'expo-dev-client';
 import { HeroUINativeProvider, useThemeColor } from 'heroui-native';
 import { Uniwind } from 'uniwind';
@@ -51,8 +51,18 @@ Uniwind.setTheme('light');
 
 void SplashScreen.preventAutoHideAsync();
 
+/**
+ * Font files can be slow or blocked — notably behind the web preview's asset
+ * proxy, where the request may neither resolve nor reject. Blocking the whole
+ * app on that shows an indefinite blank screen, so start rendering after this
+ * deadline and let the system font stand in until Inter arrives.
+ */
+const FONT_TIMEOUT_MS = 2500;
+
 function AppSplash() {
-  return <View className="bg-background flex-1" />;
+  // Plain style, not a token class: this renders before the theme provider is
+  // mounted, and the light theme's background is white regardless.
+  return <View style={{ flex: 1, backgroundColor: '#ffffff' }} />;
 }
 
 /**
@@ -170,6 +180,13 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
+  const [fontDeadlinePassed, setFontDeadlinePassed] = useState(false);
+
+  useEffect(() => {
+    if (loaded || error) return undefined;
+    const timer = setTimeout(() => setFontDeadlinePassed(true), FONT_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [loaded, error]);
 
   // Report uncaught JS errors and unhandled promise rejections to parent (Bilt preview iframe)
   useEffect(() => {
@@ -244,13 +261,13 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (loaded || error) {
+    if (loaded || error || fontDeadlinePassed) {
       void SplashScreen.hideAsync();
     }
-  }, [loaded, error]);
+  }, [loaded, error, fontDeadlinePassed]);
 
-  if (!loaded && !error) {
-    return null;
+  if (!loaded && !error && !fontDeadlinePassed) {
+    return <AppSplash />;
   }
 
   return (

@@ -28,18 +28,18 @@ Two audiences in one app:
 
 ## 2. Stack
 
-| Concern | Choice |
-| --- | --- |
-| Framework | Expo (React Native) + Expo Router 6, file-based routes |
-| Styling | Uniwind (Tailwind utilities for RN) + HeroUI Native |
-| UI kit | HeroUI Native (`Button`, `Card`, `Surface`, `Chip`, `TextField`, `Input`, `Label`, `Description`, `Separator`, `SearchField`, `Spinner`, `Typography`) |
-| Icons | `lucide-react-native` |
-| Motion | `react-native-reanimated` v4 (+ `react-native-gesture-handler`) |
-| Maps | one cross-platform `MapView` abstraction (`react-native-maps` on native, web implementation on web) |
-| SVG | `react-native-svg` (route mini-diagrams) |
-| State | zustand + AsyncStorage persistence (three stores) |
-| Haptics | `expo-haptics` |
-| Font | Inter 400 / 500 / 600 / 700 |
+| Concern   | Choice                                                                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Framework | Expo (React Native) + Expo Router 6, file-based routes                                                                                                 |
+| Styling   | Uniwind (Tailwind utilities for RN) + HeroUI Native                                                                                                    |
+| UI kit    | HeroUI Native (`Button`, `Card`, `Surface`, `Chip`, `TextField`, `Input`, `Label`, `Description`, `Separator`, `SearchField`, `Spinner`, `Typography`) |
+| Icons     | `lucide-react-native`                                                                                                                                  |
+| Motion    | `react-native-reanimated` v4 (+ `react-native-gesture-handler`)                                                                                        |
+| Maps      | one cross-platform `MapView` abstraction (`react-native-maps` on native, web implementation on web)                                                    |
+| SVG       | `react-native-svg` (route mini-diagrams)                                                                                                               |
+| State     | zustand + AsyncStorage persistence (three stores)                                                                                                      |
+| Haptics   | `expo-haptics`                                                                                                                                         |
+| Font      | Inter 400 / 500 / 600 / 700                                                                                                                            |
 
 No backend. All data is local: seeded Islamabad routes plus anything the user
 publishes on-device.
@@ -54,9 +54,9 @@ The brand is a **green + blue duotone with fixed, non-interchangeable roles**,
 both at matched lightness and chroma so they read as one family:
 
 - **BLUE = the network.** Routes, navigation, primary buttons, selected states,
-  tab active tint, polylines, links, category tiles. *It is the colour you press.*
+  tab active tint, polylines, links, category tiles. _It is the colour you press._
 - **GREEN = motion.** Running now, active journey, the boarding end of a path.
-  *It is the colour you catch.*
+  _It is the colour you catch._
 - **Idle grey** is desaturated to the blue hue, so grey never looks foreign.
 - **Fare is warm amber, deliberately outside the brand**, so a price can never be
   mistaken for a status or for something tappable.
@@ -123,32 +123,32 @@ Map overlays, icon props and status bars are native props and cannot resolve
 the token first, then the hex.
 
 ```ts
-const BRAND_BLUE  = '#0F6BB5'; // mirrors --accent / --color-route
+const BRAND_BLUE = '#0F6BB5'; // mirrors --accent / --color-route
 const BRAND_GREEN = '#0E8A63'; // mirrors --color-live
 
 MAP_COLORS = {
-  route:        '#0F6BB5',
-  routeMuted:   '#94A3B8',
-  routeDraft:   '#EA7317',                    // vendor drawing a new path
-  radiusFill:   'rgba(15, 107, 181, 0.10)',
+  route: '#0F6BB5',
+  routeMuted: '#94A3B8',
+  routeDraft: '#EA7317', // vendor drawing a new path
+  radiusFill: 'rgba(15, 107, 181, 0.10)',
   radiusStroke: 'rgba(15, 107, 181, 0.42)',
-  start:        '#0E8A63',                    // boarding end = green
-  end:          '#DC2626',
-  stop:         '#F59E0B',
-  user:         '#0F6BB5',
+  start: '#0E8A63', // boarding end = green
+  end: '#DC2626',
+  stop: '#F59E0B',
+  user: '#0F6BB5',
 };
 
 ICON_COLORS = {
-  live:        '#0E8A63',
-  danger:      '#B91C1C',
-  fare:        '#8A5A17',
-  onBrand:     '#FFFFFF',
-  onBrandMint: '#8FEFC9',   // icons on the gradient header
+  live: '#0E8A63',
+  danger: '#B91C1C',
+  fare: '#8A5A17',
+  onBrand: '#FFFFFF',
+  onBrandMint: '#8FEFC9', // icons on the gradient header
 };
 
-HERO_GRADIENT          = ['#0C6B4C', '#0B6B74', '#12529B']; // green → teal → blue
-ON_BRAND_SURFACE       = 'rgba(255, 255, 255, 0.16)';
-ON_BRAND_LIVE_SURFACE  = 'rgba(143, 239, 201, 0.22)';
+HERO_GRADIENT = ['#0C6B4C', '#0B6B74', '#12529B']; // green → teal → blue
+ON_BRAND_SURFACE = 'rgba(255, 255, 255, 0.16)';
+ON_BRAND_LIVE_SURFACE = 'rgba(143, 239, 201, 0.22)';
 
 ISLAMABAD_CENTER = { latitude: 33.6844, longitude: 73.0479 };
 ```
@@ -157,14 +157,14 @@ All three gradient stops clear AA contrast against white text.
 
 ### 3.4 Colour role table
 
-| Meaning | Surface | Text / icon | Border |
-| --- | --- | --- | --- |
-| Running now / live | `bg-live-surface` | `text-live`, `ICON_COLORS.live` | `border-live-border` |
-| Route / network / selected | `bg-route-surface`, `bg-accent` | `text-accent`, `text-accent-foreground` | `border-route-border`, `border-accent` |
-| Idle / nobody running | `bg-idle-surface` | `text-idle` | `border-idle-border` |
-| Fare | `bg-fare-surface` | `text-fare`, `ICON_COLORS.fare` | `border-fare-border` |
-| Destructive | HeroUI `danger` / `danger-soft` button variants | `text-danger`, `ICON_COLORS.danger` | — |
-| Draft path (vendor) | — | `MAP_COLORS.routeDraft` | — |
+| Meaning                    | Surface                                         | Text / icon                             | Border                                 |
+| -------------------------- | ----------------------------------------------- | --------------------------------------- | -------------------------------------- |
+| Running now / live         | `bg-live-surface`                               | `text-live`, `ICON_COLORS.live`         | `border-live-border`                   |
+| Route / network / selected | `bg-route-surface`, `bg-accent`                 | `text-accent`, `text-accent-foreground` | `border-route-border`, `border-accent` |
+| Idle / nobody running      | `bg-idle-surface`                               | `text-idle`                             | `border-idle-border`                   |
+| Fare                       | `bg-fare-surface`                               | `text-fare`, `ICON_COLORS.fare`         | `border-fare-border`                   |
+| Destructive                | HeroUI `danger` / `danger-soft` button variants | `text-danger`, `ICON_COLORS.danger`     | —                                      |
+| Draft path (vendor)        | —                                               | `MAP_COLORS.routeDraft`                 | —                                      |
 
 ---
 
@@ -175,15 +175,15 @@ injected as a `<link>` on web.
 
 All text goes through HeroUI `Typography` with `type` + `weight` + `color`:
 
-| Usage | Spec |
-| --- | --- |
-| Screen hero title (gradient header) | `type="h3"`, `className="text-white"` |
-| Form / flow screen title | `type="h4"` (sign-in) or `type="h5"` |
-| Card / entity title, section header | `type="h6"` |
-| Stat value, account name, numbers | `type="h5"` or `type="body"` + `weight="semibold"` |
-| Body copy | `type="body-sm"`, `color="muted"` for secondary |
-| Meta, badge, chip, caption | `type="body-xs"` |
-| Overline / group label | `type="body-xs"` `weight="semibold"` `color="muted"` `className="tracking-wide uppercase"` |
+| Usage                               | Spec                                                                                       |
+| ----------------------------------- | ------------------------------------------------------------------------------------------ |
+| Screen hero title (gradient header) | `type="h3"`, `className="text-white"`                                                      |
+| Form / flow screen title            | `type="h4"` (sign-in) or `type="h5"`                                                       |
+| Card / entity title, section header | `type="h6"`                                                                                |
+| Stat value, account name, numbers   | `type="h5"` or `type="body"` + `weight="semibold"`                                         |
+| Body copy                           | `type="body-sm"`, `color="muted"` for secondary                                            |
+| Meta, badge, chip, caption          | `type="body-xs"`                                                                           |
+| Overline / group label              | `type="body-xs"` `weight="semibold"` `color="muted"` `className="tracking-wide uppercase"` |
 
 Rules: titles truncate with `numberOfLines={1}` in cards and rows; descriptive
 copy never truncates; a stat's value and its label are always a pair
@@ -194,7 +194,7 @@ copy never truncates; a stat's value and its label are always a pair
 ## 5. Layout, spacing, shape
 
 - **Content column:** `CONTENT_COLUMN = 'w-full max-w-[720px] self-center'`, applied
-  to the *scroll content container* of every screen (`contentContainerClassName`),
+  to the _scroll content container_ of every screen (`contentContainerClassName`),
   never per card. Below 720px it is a no-op; above it, the column centres.
   Exception: the vendor route-drawing map stays full width.
 - **Screen padding:** `p-4` (tab/flow screens), list bottom `pb-10`, form bottom `pb-6`.
@@ -221,42 +221,42 @@ line-drawing.
 
 ```ts
 MOTION_DURATION = {
-  press:   180,  // press and release feedback
-  enter:   260,  // entrances, exits, cross-fades
-  layout:  300,  // reordering and resizing
-  draw:    480,  // a route line drawing itself in a list row
-  drawMap: 900,  // a route line drawing itself across a detail map
+  press: 180, // press and release feedback
+  enter: 260, // entrances, exits, cross-fades
+  layout: 300, // reordering and resizing
+  draw: 480, // a route line drawing itself in a list row
+  drawMap: 900, // a route line drawing itself across a detail map
 };
 
-SPRING_SNAP  = { damping: 18, stiffness: 320, mass: 0.5 };  // press feedback, small icon moves
-SPRING_GLIDE = { damping: 20, stiffness: 220, mass: 0.6 };  // sliding indicators, segmented thumbs
-SPRING_POP   = { damping: 12, stiffness: 260, mass: 0.5 };  // a selection that should feel confirmed
+SPRING_SNAP = { damping: 18, stiffness: 320, mass: 0.5 }; // press feedback, small icon moves
+SPRING_GLIDE = { damping: 20, stiffness: 220, mass: 0.6 }; // sliding indicators, segmented thumbs
+SPRING_POP = { damping: 12, stiffness: 260, mass: 0.5 }; // a selection that should feel confirmed
 
 // Stage timings for the route detail reveal
 ROUTE_SEQUENCE = { preparing: 620, map: 0, line: 120, stops: 320, vehicle: 640, panel: 760 };
 
-easeOut   = (t) => 1 - (1 - t) ** 3;             // matches withTiming default feel
+easeOut = (t) => 1 - (1 - t) ** 3; // matches withTiming default feel
 easeInOut = (t) => 0.5 - Math.cos(Math.PI * t) / 2; // seamless loops
 ```
 
 ### 6.1 Motion vocabulary
 
-| Pattern | Spec |
-| --- | --- |
-| Screen push | `slide_from_right`, 260ms |
-| Row / card entrance | fade + 12px rise, 260ms, staggered 45ms per index, stagger capped at 8 steps |
-| List reorder (filter / sort) | `LinearTransition` 300ms on each row |
-| Press feedback | spring in (`SPRING_SNAP`), timing out (180ms); scale 0.97 and opacity 0.9 by default |
-| Selection confirm (chip) | `withSequence(withTiming(1, 110ms), withSpring(0, SPRING_POP))` → scale +7% |
-| Segmented thumb | `withSpring(index * segmentWidth, SPRING_GLIDE)` |
-| Tab icon focus | `withSpring(focused ? 1 : 0, { damping: 14, stiffness: 260, mass: 0.5 })` → scale +14%, lift 2px |
-| Live status pulse | halo: 1800ms `Easing.out`, infinite, opacity `(1 - p) * 0.5`, scale `1 + p * 2` |
-| Empty-state icon float | 2400ms `Easing.inOut`, reversing repeat, translateY `-p * 4` |
-| Loader bus sweep | 1500ms `Easing.inOut`, infinite, translateX across the track, trail width follows |
-| Number change | step through intermediate values at 90ms, max 8 steps, each settles with a 7px upward roll (180ms) |
-| Number emphasis | 1100ms `Easing.inOut` reversing pulse, scale +4% |
-| Route line draw (row) | eased 0→1 over 480ms, 32ms frame step, delayed 70ms per row (max 8 rows) |
-| Header collapse on scroll | translateY `scrollY * 0.22`, scale `1 - settled * 0.02`, opacity `1 - settled * 0.3`, over 160px of travel |
+| Pattern                      | Spec                                                                                                       |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Screen push                  | `slide_from_right`, 260ms                                                                                  |
+| Row / card entrance          | fade + 12px rise, 260ms, staggered 45ms per index, stagger capped at 8 steps                               |
+| List reorder (filter / sort) | `LinearTransition` 300ms on each row                                                                       |
+| Press feedback               | spring in (`SPRING_SNAP`), timing out (180ms); scale 0.97 and opacity 0.9 by default                       |
+| Selection confirm (chip)     | `withSequence(withTiming(1, 110ms), withSpring(0, SPRING_POP))` → scale +7%                                |
+| Segmented thumb              | `withSpring(index * segmentWidth, SPRING_GLIDE)`                                                           |
+| Tab icon focus               | `withSpring(focused ? 1 : 0, { damping: 14, stiffness: 260, mass: 0.5 })` → scale +14%, lift 2px           |
+| Live status pulse            | halo: 1800ms `Easing.out`, infinite, opacity `(1 - p) * 0.5`, scale `1 + p * 2`                            |
+| Empty-state icon float       | 2400ms `Easing.inOut`, reversing repeat, translateY `-p * 4`                                               |
+| Loader bus sweep             | 1500ms `Easing.inOut`, infinite, translateX across the track, trail width follows                          |
+| Number change                | step through intermediate values at 90ms, max 8 steps, each settles with a 7px upward roll (180ms)         |
+| Number emphasis              | 1100ms `Easing.inOut` reversing pulse, scale +4%                                                           |
+| Route line draw (row)        | eased 0→1 over 480ms, 32ms frame step, delayed 70ms per row (max 8 rows)                                   |
+| Header collapse on scroll    | translateY `scrollY * 0.22`, scale `1 - settled * 0.02`, opacity `1 - settled * 0.3`, over 160px of travel |
 
 ### 6.2 Motion helper hooks
 
@@ -360,19 +360,19 @@ hardware back button while focused:
 
 ```ts
 BACK_FALLBACKS = {
-  'route/[id]':                  '/',
-  'vendor/sign-in':              '/vendor',
-  'vendor/join':                 '/vendor',
-  'vendor/new/path':             '/vendor',
-  'vendor/new/details':          '/vendor/new/path',
-  'vendor/new/vehicle':          '/vendor',
-  'vendor/new/fares':            '/vendor/new/vehicle',
-  'vendor/registration/[id]':    '/vendor',
-  'journey/[registrationId]':    '/vendor',
+  'route/[id]': '/',
+  'vendor/sign-in': '/vendor',
+  'vendor/join': '/vendor',
+  'vendor/new/path': '/vendor',
+  'vendor/new/details': '/vendor/new/path',
+  'vendor/new/vehicle': '/vendor',
+  'vendor/new/fares': '/vendor/new/vehicle',
+  'vendor/registration/[id]': '/vendor',
+  'journey/[registrationId]': '/vendor',
 };
 
-goBackOrReplace(fallback)  // back if history exists, else replace
-exitFlowTo(target)         // dismissAll() then replace(target) — leaving a multi-step flow
+goBackOrReplace(fallback); // back if history exists, else replace
+exitFlowTo(target); // dismissAll() then replace(target) — leaving a multi-step flow
 ```
 
 `router.dismissTo('/vendor')` does **not** work here: tab routes live inside the
@@ -422,34 +422,71 @@ re-prompts for permission.
 ```ts
 type RouteCategory = 'wagon' | 'van' | 'coaster' | 'rickshaw' | 'shuttle' | 'university' | 'other';
 type DirectionType = 'one-way' | 'two-way';
-type StopType      = 'fixed' | 'flexible';
-type RouteDirection = 'forward' | 'reverse';   // forward = start → end
+type StopType = 'fixed' | 'flexible';
+type RouteDirection = 'forward' | 'reverse'; // forward = start → end
 
-interface NamedPlace { name: string; coordinate: LatLng }
-interface RouteStop  { id: string; name: string; coordinate: LatLng }
-interface FareSlab   { id: string; fromKm: number; toKm: number | null; fare: number } // toKm null = "and beyond"
+interface NamedPlace {
+  name: string;
+  coordinate: LatLng;
+}
+interface RouteStop {
+  id: string;
+  name: string;
+  coordinate: LatLng;
+}
+interface FareSlab {
+  id: string;
+  fromKm: number;
+  toKm: number | null;
+  fare: number;
+} // toKm null = "and beyond"
 
-interface TransportRoute {            // the shared path; many vendors may run one route
-  id: string; name: string; category: RouteCategory;
-  start: NamedPlace; end: NamedPlace; path: LatLng[];
-  directionType: DirectionType; stopType: StopType; stops: RouteStop[];
-  estimatedDurationMinutes: number; createdAt: string; createdByAccountId: string | null;
+interface TransportRoute {
+  // the shared path; many vendors may run one route
+  id: string;
+  name: string;
+  category: RouteCategory;
+  start: NamedPlace;
+  end: NamedPlace;
+  path: LatLng[];
+  directionType: DirectionType;
+  stopType: StopType;
+  stops: RouteStop[];
+  estimatedDurationMinutes: number;
+  createdAt: string;
+  createdByAccountId: string | null;
 }
 
-interface VendorRegistration {        // one vendor's vehicle + fares on a route
-  id: string; accountId: string; routeId: string;
-  vendorName: string; contact: string;
-  vehicleRegistration: string; vehicleDetails: string;
-  estimatedDurationMinutes: number; stopType: StopType;
-  fareSlabs: FareSlab[]; createdAt: string;
+interface VendorRegistration {
+  // one vendor's vehicle + fares on a route
+  id: string;
+  accountId: string;
+  routeId: string;
+  vendorName: string;
+  contact: string;
+  vehicleRegistration: string;
+  vehicleDetails: string;
+  estimatedDurationMinutes: number;
+  stopType: StopType;
+  fareSlabs: FareSlab[];
+  createdAt: string;
 }
 
-interface Journey {                   // an explicit operating session
-  id: string; registrationId: string; routeId: string;
-  direction: RouteDirection; startedAt: string; endedAt: string | null;
+interface Journey {
+  // an explicit operating session
+  id: string;
+  registrationId: string;
+  routeId: string;
+  direction: RouteDirection;
+  startedAt: string;
+  endedAt: string | null;
 }
 
-interface Account { id: string; name: string; phone: string }
+interface Account {
+  id: string;
+  name: string;
+  phone: string;
+}
 ```
 
 Key modelling decision: **a registration is only "live" while a `Journey` with
@@ -458,12 +495,12 @@ Key modelling decision: **a registration is only "live" while a `Journey` with
 ### 9.2 Stores (zustand + AsyncStorage)
 
 ```ts
-useTransportStore  // routes, registrations, journeys
-                   // createRoute, addRegistration, updateRegistration, removeRegistration,
-                   // startJourney, endJourney, resetDemoData
-useSessionStore    // account, signIn(name, phone), signOut
-useRouteDraftStore // draft, startCreate, startJoin, patch, reset   (multi-step vendor wizard)
-useStoresHydrated()// true once both persisted stores have rehydrated
+useTransportStore; // routes, registrations, journeys
+// createRoute, addRegistration, updateRegistration, removeRegistration,
+// startJourney, endJourney, resetDemoData
+useSessionStore; // account, signIn(name, phone), signOut
+useRouteDraftStore; // draft, startCreate, startJoin, patch, reset   (multi-step vendor wizard)
+useStoresHydrated(); // true once both persisted stores have rehydrated
 ```
 
 ### 9.3 Derived helpers (`lib/transport.ts`)
@@ -482,7 +519,7 @@ matchesQuery(route, query)                                    // all tokens must
 ```ts
 interface NearbyRoute {
   route: TransportRoute;
-  accessDistanceKm: number;   // walking distance to the nearest point on the path
+  accessDistanceKm: number; // walking distance to the nearest point on the path
   accessPoint: LatLng;
   nearestStopName: string | null;
   routeLengthKm: number;
@@ -523,9 +560,14 @@ Stops and sectors are ranked by match position, then by label length.
 
 ```ts
 interface Suggestion {
-  key: string; kind: 'stop' | 'sector' | 'route';
-  label: string; detail: string; query: string;
-  routeId: string | null; matchStart: number; matchLength: number;
+  key: string;
+  kind: 'stop' | 'sector' | 'route';
+  label: string;
+  detail: string;
+  query: string;
+  routeId: string | null;
+  matchStart: number;
+  matchLength: number;
 }
 ```
 
@@ -542,15 +584,15 @@ produces direction-reversed paths and stops.
 One symbolic vehicle silhouette per category, and **an icon never appears
 without its written label**, so the symbol teaches itself on first use.
 
-| Category | Label | Icon (lucide) |
-| --- | --- | --- |
-| `wagon` | Wagon | `Truck` |
-| `van` | Van | `Caravan` |
-| `coaster` | Coaster | `Bus` |
-| `rickshaw` | Rickshaw route | `CarTaxiFront` |
-| `shuttle` | Shuttle | `BusFront` |
-| `university` | University transport | `GraduationCap` |
-| `other` | Other local transport | `Route` |
+| Category     | Label                 | Icon (lucide)   |
+| ------------ | --------------------- | --------------- |
+| `wagon`      | Wagon                 | `Truck`         |
+| `van`        | Van                   | `Caravan`       |
+| `coaster`    | Coaster               | `Bus`           |
+| `rickshaw`   | Rickshaw route        | `CarTaxiFront`  |
+| `shuttle`    | Shuttle               | `BusFront`      |
+| `university` | University transport  | `GraduationCap` |
+| `other`      | Other local transport | `Route`         |
 
 Fixed semantic icons elsewhere: fare `Wallet`, walking distance `Footprints`,
 duration `Clock` / `Timer`, route length `Ruler`, live `Zap` / `Radio`,
@@ -567,11 +609,11 @@ interface TappableProps extends Omit<PressableProps, 'style' | 'children'> {
   children: React.ReactNode;
   className?: string;
   style?: ViewStyle;
-  pressedScale?: number;    // 0.97
-  pressedOpacity?: number;  // 0.9
-  pressedLift?: number;     // 0
-  haptic?: HapticStrength | false;  // 'light'
-  progress?: SharedValue<number>;   // exposed so children can react to the press
+  pressedScale?: number; // 0.97
+  pressedOpacity?: number; // 0.9
+  pressedLift?: number; // 0
+  haptic?: HapticStrength | false; // 'light'
+  progress?: SharedValue<number>; // exposed so children can react to the press
 }
 ```
 
@@ -584,8 +626,11 @@ interface TappableProps extends Omit<PressableProps, 'style' | 'children'> {
 ### 11.2 `Reveal` — entrance and reorder
 
 ```ts
-{ children, index = 0, delay = 0, distance = 12, animateLayout = false, className, style }
+{
+  (children, (index = 0), (delay = 0), (distance = 12), (animateLayout = false), className, style);
+}
 ```
+
 `FadeInDown` (or `FadeIn` when `distance === 0`), 260ms, delay
 `delay + min(index, 8) * 45`. With `animateLayout`, adds `LinearTransition(300ms)`
 so filter/sort reorders slide instead of jumping. Purely presentational — never
@@ -596,6 +641,7 @@ intercepts touches.
 ```ts
 { value, unit?, type = 'h6', emphasis = false, className?, unitClassName? }
 ```
+
 Steps through intermediate values at 90ms (max 8 steps) instead of replacing
 text. Each settle: `translateY = roll * 7`, `opacity = 1 - |roll| * 0.5`,
 resolving with `withTiming(0, 180ms)`. `emphasis` adds an infinite 1100ms
@@ -607,6 +653,7 @@ unit renders as `body-xs` muted.
 ```ts
 { label, icon?, isSelected, onPress, tone = 'accent' | 'success' }
 ```
+
 HeroUI `Chip size="sm"`, `variant={isSelected ? 'primary' : 'tertiary'}`,
 `color={isSelected ? tone : 'default'}`. Icon 13px:
 selected → `accent-foreground` (or white for `success`), unselected → `muted`.
@@ -616,16 +663,22 @@ Pops **only when switching on**: `withSequence(withTiming(1, 110), withSpring(0,
 ### 11.5 `TabBarIcon`
 
 ```ts
-{ icon, color, size, focused }
+{
+  (icon, color, size, focused);
+}
 ```
+
 `withSpring(focused ? 1 : 0, { damping: 14, stiffness: 260, mass: 0.5 })`;
 `transform: [{ scale: 1 + p * 0.14 }, { translateY: p * -2 }]`.
 
 ### 11.6 `HeaderBackButton`
 
 ```ts
-{ route: BackFallbackRoute, label = 'Back' }
+{
+  route: (BackFallbackRoute, (label = 'Back'));
+}
 ```
+
 `Tappable` with `haptic="selection"`, `hitSlop={16}`, `pressedScale={0.9}`,
 `className="-ml-1 flex-row items-center gap-0.5 py-2 pr-2 pl-1"`; children
 `ChevronLeft` 24px (foreground) + `Typography type="body" weight="medium"`.
@@ -636,6 +689,7 @@ Also exports `useSafeHardwareBack(route)` and `HeaderSpacer` (`w-2`).
 ```ts
 { category, size = 'sm' | 'md' | 'lg', muted = false, className? }
 ```
+
 `items-center justify-center` + size class + `bg-route-surface` (or
 `bg-surface-secondary` when muted). Sizes: `h-9 w-9 rounded-xl` / `h-11 w-11
 rounded-2xl` / `h-14 w-14 rounded-2xl`; icon 17 / 21 / 26px in `accent` (or
@@ -646,6 +700,7 @@ rounded-2xl` / `h-14 w-14 rounded-2xl`; icon 17 / 21 / 26px in `accent` (or
 ```ts
 { isLive, label?, className? }
 ```
+
 `flex-row items-center gap-1.5 self-start rounded-full border px-2.5 py-1`
 plus `border-live-border bg-live-surface` or `border-idle-border bg-idle-surface`.
 Contains a 2×2 dot (`bg-live` / `bg-idle`) and, when live, a pulsing halo
@@ -667,6 +722,7 @@ Default copy: **"Running now"** / **"Not running"**. Wording is always
 ```ts
 SectionHeader { title, meta?, action?, icon?, className? }
 ```
+
 `flex-row items-center justify-between gap-3`; left group
 `flex-shrink flex-row items-center gap-2` with an optional 16px muted icon and a
 `h6` title; right side is either `meta` (`body-xs` muted) or an interactive
@@ -676,7 +732,9 @@ SectionHeader { title, meta?, action?, icon?, className? }
 ### 11.11 `RouteCard` — the primary list object
 
 ```ts
-{ item: NearbyRoute, onPress, showAccessDistance = true, drawDelay = 0 }
+{
+  item: (NearbyRoute, onPress, (showAccessDistance = true), (drawDelay = 0));
+}
 ```
 
 ```
@@ -707,6 +765,7 @@ stop behaviour instead.
 ```ts
 { path, muted = false, width = 56, drawDelay = 0, animate = true, emphasis?, live = false, className? }
 ```
+
 Height 44. Projects the path into the box preserving proportions, then:
 
 - faint full path at `strokeOpacity={0.18}` while progress < 1;
@@ -727,6 +786,7 @@ Muted variant strokes and dots in `MAP_COLORS.routeMuted`.
 ```ts
 { value, onChange, placeholder, focusedPlaceholder?, className?, onFocusChange? }
 ```
+
 HeroUI `SearchField` with `Group` / `SearchIcon` / `Input` / `ClearButton`.
 On focus: group gains `border-accent`, the field scales
 `1 + focus * 0.015` (`SPRING_GLIDE`), the `Search` icon (18px) scales
@@ -737,8 +797,11 @@ placeholder swaps to the more specific `focusedPlaceholder`.
 ### 11.14 `RouteSuggestions`
 
 ```ts
-{ suggestions, onSelect }
+{
+  (suggestions, onSelect);
+}
 ```
+
 Container: `AnimatedView` `entering={FadeIn(260)}` `exiting={FadeOut(160)}`
 `className="border-border bg-surface overflow-hidden rounded-3xl border"`.
 Each row is a `Reveal index distance={8}` wrapping a `Tappable`
@@ -760,8 +823,11 @@ divider: View className="bg-border ml-[60px] h-px"   (all but the last row)
 ### 11.15 `DirectionSwitch`
 
 ```ts
-{ route, value, onChange }
+{
+  (route, value, onChange);
+}
 ```
+
 Track `bg-surface-secondary relative flex-row rounded-2xl` with `padding: 6`,
 `accessibilityRole="tablist"`. Thumb `bg-accent absolute rounded-xl`, inset by
 the padding, width = segment width, `translateX = withSpring(index * segmentWidth, SPRING_GLIDE)`.
@@ -776,14 +842,15 @@ showing origin → `ArrowRight` 13px → destination, all `body-xs semibold`,
 ```ts
 { route, direction, origin? }
 ```
+
 Vertical rail: 4-wide gutter with a dot per row and a `bg-border w-0.5 flex-1`
 connector below every row but the last.
 
-| Row kind | Dot |
-| --- | --- |
-| start | `bg-live h-3.5 w-3.5 rounded-full` |
-| end | `bg-danger h-3.5 w-3.5 rounded-full` |
-| stop | `border-accent bg-background mt-0.5 h-2.5 w-2.5 rounded-full border-2` |
+| Row kind | Dot                                                                    |
+| -------- | ---------------------------------------------------------------------- |
+| start    | `bg-live h-3.5 w-3.5 rounded-full`                                     |
+| end      | `bg-danger h-3.5 w-3.5 rounded-full`                                   |
+| stop     | `border-accent bg-background mt-0.5 h-2.5 w-2.5 rounded-full border-2` |
 
 Content column `flex-1` with `pb-4` (last row `pb-0`): name `body-sm`
 (`semibold` for start/end), an optional **"Closest"** pill
@@ -822,6 +889,7 @@ No "fare from" line here when the fare table is shown.
 ```ts
 { slabs, highlightSlabId? }
 ```
+
 `border-border overflow-hidden rounded-xl border`; each row
 `flex-row items-center justify-between px-3.5 py-2.5`, `border-border border-t`
 from the second row on, `bg-fare-surface` when it is the highlighted slab.
@@ -831,8 +899,11 @@ Empty: **"This vendor has not shared fares yet."** (`body-sm muted`).
 ### 11.19 `FareSlabEditor`
 
 ```ts
-{ initialSlabs, onChange }   // also exports parseFareRows
+{
+  (initialSlabs, onChange);
+} // also exports parseFareRows
 ```
+
 Rows are `Reveal index className="border-border gap-2 rounded-xl border p-3"`.
 Header: label `body-xs semibold muted` reading **"From {n} km"**, or
 **"{n} km and beyond"** on a final row with an empty upper bound; plus a
@@ -847,6 +918,7 @@ placeholder `100`). Both inputs strip non-digits. Footer: `tertiary` button
 ```ts
 { label, hint?, options: { value, label, icon? }[], value, onChange }
 ```
+
 `gap-2`; label `body-sm semibold`; optional hint `body-xs muted`; options in a
 `flex-row flex-wrap gap-2` of HeroUI chips (`size="sm"`,
 `variant={selected ? 'primary' : 'tertiary'}`, `color={selected ? 'accent' : 'default'}`),
@@ -858,6 +930,7 @@ each with an optional 13px icon and `accessibilityState.selected`,
 ```ts
 { icon, title, description, actionLabel?, onAction?, secondaryActionLabel?, onSecondaryAction? }
 ```
+
 `items-center gap-3 px-6 py-10`. Icon in a floating
 `bg-route-surface h-16 w-16 items-center justify-center rounded-3xl` tile
 (28px accent icon, `translateY: -p * 4` over 2400ms `Easing.inOut`, reversing).
@@ -870,6 +943,7 @@ staggered at 0 / 60 / 100 / 140 / 180ms.
 ```ts
 { label = 'Finding your fastest route…', className? }
 ```
+
 `items-center justify-center gap-4 px-6`; a `w-full max-w-[220px] gap-3` track:
 a 28px `bg-accent rounded-full` bubble with a white `Bus` icon (15px) sweeping
 `translateX` across the track, a `bg-border h-0.5 w-full rounded-full` rail with
@@ -960,7 +1034,7 @@ Root `View className="bg-background flex-1"` containing a **FlatList**
        `bg-accent border-accent` + white icon when expanded, label
        "Expand and pan the map" / "Shrink the map").
      - Radius pills `border-border bg-background absolute right-3 bottom-3 left-3
-       flex-row items-center gap-1 rounded-full border p-1`: four `Tappable`s
+flex-row items-center gap-1 rounded-full border p-1`: four `Tappable`s
        (1, 2, 5, 10 km), `pressedScale={0.93}`, `hitSlop={{ top: 8, bottom: 8 }}`,
        `min-h-9 flex-1 items-center justify-center rounded-full py-2`,
        `bg-accent` when selected, label `body-xs semibold`
@@ -983,9 +1057,9 @@ with `showAccessDistance={coordinate !== null}` and
 
 **Empty states:**
 
-| Case | Icon | Title | Description | Actions |
-| --- | --- | --- | --- | --- |
-| search returned nothing | `SearchX` | "No routes found" | "Try another sector or stop, or clear the search to see everything nearby." | "Clear search" |
+| Case                    | Icon        | Title                          | Description                                                                                | Actions                                                                        |
+| ----------------------- | ----------- | ------------------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| search returned nothing | `SearchX`   | "No routes found"              | "Try another sector or stop, or clear the search to see everything nearby."                | "Clear search"                                                                 |
 | radius returned nothing | `MapPinOff` | "No routes within this radius" | "Nothing published near you yet. Widen the radius, or publish the route you run yourself." | "Widen to 10 km" (or "Browse all routes" at 10 km) + secondary "I run a route" |
 
 **Sorting:** running vendors first (descending `activeVendorCount`), then nearest
@@ -1057,7 +1131,7 @@ ScrollView, `contentContainerClassName={cn('gap-5 p-4', CONTENT_COLUMN)}`
   - `bg-surface-secondary` tile + `PlusCircle` 22px muted — **"Join an existing
     route"** / **"Someone already added your route — add your vehicle to it"** →
     `/vendor/join`.
-  Both end in `ArrowRight` 18px muted.
+    Both end in `ArrowRight` 18px muted.
 - `SectionHeader title="My routes"` with meta `"{n} registered"`.
 - Empty: `Route` icon, **"No routes published yet"**, **"Add the route you run and
   it becomes searchable for passengers around you."**, action **"Create a route"**.
@@ -1076,7 +1150,7 @@ ScrollView, `contentContainerClassName={cn('gap-5 p-4', CONTENT_COLUMN)}`
 ScrollView, `contentContainerClassName={cn('gap-5 p-4 pb-10', CONTENT_COLUMN)}`.
 
 - Account `Card`: `bg-route-surface h-12 w-12 items-center justify-center
-  rounded-full` avatar with `UserRound` 24px accent; `h6` name or
+rounded-full` avatar with `UserRound` 24px accent; `h6` name or
   **"Browsing as passenger"**; `body-sm muted` phone or **"Sign in only if you
   operate transport"**. Footer (`gap-2 p-0 pt-4`): signed in → **"Sign out"**
   (`tertiary`) using the two-tap confirm (**"Yes, sign out"** + `Reveal distance={6}`
@@ -1107,7 +1181,7 @@ repeated in the body). ScrollView,
    direction chip anywhere else on the screen.
 2. `Reveal index={0}` → hero `Surface variant="secondary" className="gap-4 rounded-3xl"`:
    - `flex-row items-center gap-3`: `CategoryTile size="lg" className="bg-background"
-     muted={activeVendors.length === 0}`, then `flex-1 gap-0.5` with the category
+muted={activeVendors.length === 0}`, then `flex-1 gap-0.5` with the category
      label (`h6`) and a habits line (`body-xs muted`) reading
      `"{n} fixed stops"` or **"Picks up anywhere on the path"**, plus
      **"One-way only"** for one-way routes.
@@ -1125,9 +1199,9 @@ repeated in the body). ScrollView,
    `strokeWidth: 4`, markers for origin (green), each stop (amber) and
    destination (red); floating `Maximize2` toggle
    `border-border absolute top-3 right-3 h-11 w-11 items-center justify-center
-   rounded-full border` (+ `bg-accent border-accent` when expanded).
+rounded-full border` (+ `bg-accent border-accent` when expanded).
 4. `Reveal index={2} className="gap-3"` → `SectionHeader title="Vehicles on this
-   route"` with meta `"{n} registered"`, then:
+route"` with meta `"{n} registered"`, then:
    - no vendors → `EmptyState` `UserRoundX`, **"No vehicles registered yet"**,
      **"This route exists but nobody has attached a vehicle and fares to it."**,
      action **"I run this route"**;
@@ -1138,7 +1212,7 @@ repeated in the body). ScrollView,
      operator below to ask when they set off."** (one-way), followed by the idle
      vendors.
 5. Stops section — `SectionHeader` **"Stops in order"** (or **"Route points"**)
-   + `StopList route direction origin={coordinate}`.
+   - `StopList route direction origin={coordinate}`.
 6. Join prompt — `SectionHeader` **"Do you run this route too?"** + a `Card` with
    **"Add your vehicle and fares to this route instead of creating a duplicate."**
    and a `tertiary` **"Join this route"**: signed out → `/vendor/sign-in`;
@@ -1146,8 +1220,9 @@ repeated in the body). ScrollView,
    `/vendor/new/vehicle`.
 
 Not found (after hydration): `View className="bg-background flex-1 justify-center"`
-+ `EmptyState` `SearchX`, **"Route not found"**, **"This route may have been
-removed from this device."**, action **"Back to explore"** → `exitFlowTo('/')`.
+
+- `EmptyState` `SearchX`, **"Route not found"**, **"This route may have been
+  removed from this device."**, action **"Back to explore"** → `exitFlowTo('/')`.
 
 ### 12.6 Journey — `app/journey/[registrationId].tsx`
 
@@ -1172,7 +1247,7 @@ Header title **"Active journey"** or **"Start journey"**. ScrollView,
   (`body-xs muted text-center`). Commit: `endJourney(id)`, `success` haptic,
   `goBackOrReplace('/vendor')`.
 - Not running → primary **"Start journey"** → `startJourney(registrationId,
-  routeId, direction)`, `success` haptic, `goBackOrReplace('/vendor')`.
+routeId, direction)`, `success` haptic, `goBackOrReplace('/vendor')`.
 
 Not found: `EmptyState` `CircleOff`, **"Registration not found"**, **"This vehicle
 is no longer registered on a route."**, action **"Back to my routes"** →

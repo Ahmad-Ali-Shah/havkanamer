@@ -147,6 +147,9 @@ export const useSessionStore = create<SessionState>()(
   ),
 );
 
+/** How long to wait for persisted state before rendering without it. */
+const HYDRATION_TIMEOUT_MS = 3000;
+
 /**
  * Both stores persist to AsyncStorage, which reads asynchronously. Until those
  * reads land, `account` is null and `registrations` holds only the seed data —
@@ -173,11 +176,19 @@ export function useStoresHydrated() {
     const unsubscribeTransport = useTransportStore.persist.onFinishHydration(sync);
     const unsubscribeSession = useSessionStore.persist.onFinishHydration(sync);
 
+    // Storage can be unreachable rather than slow — a sandboxed web preview may
+    // block localStorage outright, in which case the read neither resolves nor
+    // rejects and hydration never finishes. Waiting forever would leave a blank
+    // screen with nothing to act on, so give up after a deadline and run on the
+    // seed data instead of showing nothing at all.
+    const deadline = setTimeout(() => setHydrated(true), HYDRATION_TIMEOUT_MS);
+
     // Covers the case where hydration finished between the initial state read
     // and these subscriptions being attached.
     sync();
 
     return () => {
+      clearTimeout(deadline);
       unsubscribeTransport();
       unsubscribeSession();
     };

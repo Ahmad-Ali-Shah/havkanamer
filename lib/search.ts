@@ -25,8 +25,12 @@ const MIN_QUERY_LENGTH = 2;
 const MAX_SUGGESTIONS = 6;
 
 function routeText(route: TransportRoute) {
-  return [route.name, route.start.name, route.end.name, ...route.stops.map((stop) => stop.name)]
-    .join(' ');
+  return [
+    route.name,
+    route.start.name,
+    route.end.name,
+    ...route.stops.map((stop) => stop.name),
+  ].join(' ');
 }
 
 function routesMentioning(routes: TransportRoute[], token: string) {
@@ -70,7 +74,11 @@ export function buildSuggestions(routes: TransportRoute[], query: string): Sugge
   };
 
   for (const route of routes) {
-    for (const name of [route.start.name, route.end.name, ...route.stops.map((stop) => stop.name)]) {
+    for (const name of [
+      route.start.name,
+      route.end.name,
+      ...route.stops.map((stop) => stop.name),
+    ]) {
       const at = name.toLowerCase().indexOf(needle);
       if (at === -1) continue;
 
