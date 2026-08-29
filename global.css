@@ -6,35 +6,43 @@
 @import 'heroui-native/styles';
 
 /*
- * HeroUI Native + Uniwind tokens
+ * Local Transport Discovery — brand + status tokens.
  *
- * HeroUI component variants compile to semantic utilities such as bg-accent,
- * text-accent-foreground, bg-default, and text-foreground. The imported
- * heroui-native/styles package defines the default semantic theme and maps it
- * to --color-* Tailwind utilities.
- *
- * When changing brand colors, override semantic tokens inside Uniwind theme
- * variants. Do not put --accent only in a plain :root block: web may look
- * correct through CSS cascade order while Expo Go/native keeps HeroUI's
- * default blue from the active light/dark theme table.
- *
- * Example:
- *
- * @layer theme {
- *   :root {
- *     @variant light {
- *       --accent: oklch(0.63 0.18 148);
- *       --accent-foreground: oklch(0.99 0 0);
- *       --focus: var(--accent);
- *     }
- *
- *     @variant dark {
- *       --accent: oklch(0.63 0.18 148);
- *       --accent-foreground: oklch(0.99 0 0);
- *       --focus: var(--accent);
- *     }
- *   }
- * }
+ * Brand accent is a deep azure that reads clearly on top of map tiles.
+ * Journey status uses its own scale (live / idle) so that "currently
+ * operating" is never confused with "brand coloured".
  */
+@layer theme {
+  :root {
+    @variant light {
+      --accent: oklch(0.52 0.115 250);
+      --accent-foreground: oklch(0.99 0 0);
+      --focus: var(--accent);
+    }
+
+    @variant dark {
+      --accent: oklch(0.62 0.12 250);
+      --accent-foreground: oklch(0.14 0.02 250);
+      --focus: var(--accent);
+    }
+  }
+}
+
+@theme {
+  --color-live: oklch(0.56 0.15 149);
+  --color-live-foreground: oklch(0.99 0 0);
+  --color-live-surface: oklch(0.95 0.045 149);
+  --color-live-border: oklch(0.84 0.08 149);
+
+  --color-idle: oklch(0.53 0.015 250);
+  --color-idle-surface: oklch(0.96 0.004 250);
+  --color-idle-border: oklch(0.89 0.006 250);
+
+  --color-fare: oklch(0.5 0.1 65);
+  --color-fare-surface: oklch(0.96 0.04 78);
+
+  --color-route: oklch(0.52 0.115 250);
+  --color-route-surface: oklch(0.96 0.025 250);
+}
 
 @source './node_modules/heroui-native/lib';

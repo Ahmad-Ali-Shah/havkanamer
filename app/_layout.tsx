@@ -142,7 +142,16 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <HeroUINativeProvider>
         <Stack>
-          <Stack.Screen name="(tabs)" options={{ title: 'Habits', headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="route/[id]" options={{ title: 'Route' }} />
+          <Stack.Screen name="vendor/sign-in" options={{ title: 'Vendor sign in' }} />
+          <Stack.Screen name="vendor/join" options={{ title: 'Join a route' }} />
+          <Stack.Screen name="vendor/new/path" options={{ title: 'Draw route' }} />
+          <Stack.Screen name="vendor/new/details" options={{ title: 'Route details' }} />
+          <Stack.Screen name="vendor/new/vehicle" options={{ title: 'Vehicle details' }} />
+          <Stack.Screen name="vendor/new/fares" options={{ title: 'Fares' }} />
+          <Stack.Screen name="vendor/registration/[id]" options={{ title: 'My route' }} />
+          <Stack.Screen name="journey/[registrationId]" options={{ title: 'Journey' }} />
         </Stack>
         <InstallPrompt />
       </HeroUINativeProvider>
