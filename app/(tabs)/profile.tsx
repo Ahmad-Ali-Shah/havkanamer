@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Database, Info, RotateCcw, UserRound } from 'lucide-react-native';
 import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { Button, Card, Separator, Surface, Typography, useThemeColor } from 'heroui-native';
 
 import { SectionHeader } from '@/components/SectionHeader';
+import { Reveal } from '@/components/ui/Reveal';
+import { tapFeedback } from '@/lib/haptics';
 import { ICON_COLORS } from '@/lib/mapTheme';
 import { registrationsForAccount } from '@/lib/transport';
 import { useSessionStore, useTransportStore } from '@/lib/store';
@@ -16,6 +19,10 @@ export default function ProfileScreen() {
   const registrations = useTransportStore((state) => state.registrations);
   const journeys = useTransportStore((state) => state.journeys);
   const resetDemoData = useTransportStore((state) => state.resetDemoData);
+
+  // Both of these throw work away, so neither fires on a single tap.
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+  const [confirmingReset, setConfirmingReset] = useState(false);
 
   const myRegistrations = account ? registrationsForAccount(registrations, account.id) : [];
   const myRoutes = account ? routes.filter((route) => route.createdByAccountId === account.id) : [];
@@ -41,11 +48,32 @@ export default function ProfileScreen() {
             </View>
           </View>
         </Card.Body>
-        <Card.Footer className="p-0 pt-4">
+        <Card.Footer className="gap-2 p-0 pt-4">
           {account ? (
-            <Button variant="tertiary" onPress={signOut}>
-              <Button.Label>Sign out</Button.Label>
-            </Button>
+            <>
+              <Button
+                variant={confirmingSignOut ? 'danger' : 'tertiary'}
+                onPress={() => {
+                  if (!confirmingSignOut) {
+                    tapFeedback('warning');
+                    setConfirmingSignOut(true);
+                    return;
+                  }
+                  signOut();
+                  setConfirmingSignOut(false);
+                  tapFeedback('success');
+                }}
+              >
+                <Button.Label>{confirmingSignOut ? 'Yes, sign out' : 'Sign out'}</Button.Label>
+              </Button>
+              {confirmingSignOut ? (
+                <Reveal distance={6}>
+                  <Button variant="ghost" onPress={() => setConfirmingSignOut(false)}>
+                    <Button.Label>Stay signed in</Button.Label>
+                  </Button>
+                </Reveal>
+              ) : null}
+            </>
           ) : (
             <Button onPress={() => router.push('/vendor/sign-in')}>
               <Button.Label>Sign in as a vendor</Button.Label>
@@ -92,10 +120,31 @@ export default function ProfileScreen() {
           Routes, vendors and journeys are stored on this device. Resetting restores the seeded
           Islamabad routes and clears anything you published.
         </Typography>
-        <Button variant="danger-soft" onPress={resetDemoData}>
+        <Button
+          variant={confirmingReset ? 'danger' : 'danger-soft'}
+          onPress={() => {
+            if (!confirmingReset) {
+              tapFeedback('warning');
+              setConfirmingReset(true);
+              return;
+            }
+            resetDemoData();
+            setConfirmingReset(false);
+            tapFeedback('success');
+          }}
+        >
           <RotateCcw color={ICON_COLORS.danger} size={16} />
-          <Button.Label>Reset demo data</Button.Label>
+          <Button.Label>
+            {confirmingReset ? 'Yes, reset everything' : 'Reset demo data'}
+          </Button.Label>
         </Button>
+        {confirmingReset ? (
+          <Reveal distance={6}>
+            <Button variant="ghost" onPress={() => setConfirmingReset(false)}>
+              <Button.Label>Keep my data</Button.Label>
+            </Button>
+          </Reveal>
+        ) : null}
       </View>
     </ScrollView>
   );

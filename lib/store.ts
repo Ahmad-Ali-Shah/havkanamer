@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useState } from 'react';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -145,3 +146,42 @@ export const useSessionStore = create<SessionState>()(
     },
   ),
 );
+
+/**
+ * Both stores persist to AsyncStorage, which reads asynchronously. Until those
+ * reads land, `account` is null and `registrations` holds only the seed data —
+ * so a signed-in vendor briefly sees the sign-in card, and pushing to a
+ * registration detail screen renders "not found" before hydration catches up.
+ *
+ * Screens must therefore wait for this to be true before deciding that a record
+ * is genuinely missing.
+ */
+export function useStoresHydrated() {
+  const [hydrated, setHydrated] = useState(
+    () => useTransportStore.persist.hasHydrated() && useSessionStore.persist.hasHydrated(),
+  );
+
+  useEffect(() => {
+    if (hydrated) return undefined;
+
+    const sync = () => {
+      if (useTransportStore.persist.hasHydrated() && useSessionStore.persist.hasHydrated()) {
+        setHydrated(true);
+      }
+    };
+
+    const unsubscribeTransport = useTransportStore.persist.onFinishHydration(sync);
+    const unsubscribeSession = useSessionStore.persist.onFinishHydration(sync);
+
+    // Covers the case where hydration finished between the initial state read
+    // and these subscriptions being attached.
+    sync();
+
+    return () => {
+      unsubscribeTransport();
+      unsubscribeSession();
+    };
+  }, [hydrated]);
+
+  return hydrated;
+}

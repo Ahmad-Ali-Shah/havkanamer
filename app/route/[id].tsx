@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { Stack, router, useLocalSearchParams } from 'expo-router';
-import { Clock, MapPin, Ruler, SearchX, UserRoundX, Wallet } from 'lucide-react-native';
+import { Clock, MapPin, Maximize2, Ruler, SearchX, UserRoundX, Wallet } from 'lucide-react-native';
 import { Button, Card, Separator, Surface, Typography } from 'heroui-native';
 
 import MapView from '@/components/MapView';
@@ -13,6 +13,8 @@ import { StatTile } from '@/components/Stat';
 import { StatusBadge } from '@/components/StatusBadge';
 import { StopList } from '@/components/StopList';
 import { VendorRow } from '@/components/VendorRow';
+import { Reveal } from '@/components/ui/Reveal';
+import { Tappable } from '@/components/ui/Tappable';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import {
   formatDistance,
@@ -22,11 +24,13 @@ import {
   regionForCoordinates,
   startingFare,
 } from '@/lib/geo';
+import { exitFlowTo } from '@/lib/navigation';
 import { ICON_COLORS, MAP_COLORS } from '@/lib/mapTheme';
 import { vendorsForRoute } from '@/lib/transport';
 import { categoryLabel, directionPath, directionStops } from '@/lib/types';
 import { useRouteDraftStore } from '@/lib/routeDraft';
 import { useSessionStore, useTransportStore } from '@/lib/store';
+import { cn } from '@/lib/utils';
 import type { MapMarker } from '@/components/MapView.types';
 import type { RouteDirection } from '@/lib/types';
 
@@ -41,6 +45,9 @@ export default function RouteDetailScreen() {
 
   const { coordinate, status } = useCurrentLocation();
   const [direction, setDirection] = useState<RouteDirection>('forward');
+  // This map lives in a ScrollView; leaving gestures on means it swallows
+  // vertical pans and the page stops scrolling.
+  const [mapExpanded, setMapExpanded] = useState(false);
 
   const vendors = useMemo(
     () => (route ? vendorsForRoute(registrations, journeys, route.id, direction) : []),
@@ -63,7 +70,7 @@ export default function RouteDetailScreen() {
           title="Route not found"
           description="This route may have been removed from this device."
           actionLabel="Back to explore"
-          onAction={() => router.replace('/')}
+          onAction={() => exitFlowTo('/')}
         />
       </View>
     );
@@ -120,73 +127,97 @@ export default function RouteDetailScreen() {
     .join(' · ');
 
   return (
-    <ScrollView className="bg-background flex-1" contentContainerClassName="gap-5 p-4 pb-12">
+    <ScrollView
+      className="bg-background flex-1"
+      contentContainerClassName="gap-5 p-4 pb-12"
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
       <Stack.Screen options={{ title: route.name }} />
 
       <DirectionSwitch route={route} value={direction} onChange={setDirection} />
 
-      <Surface variant="secondary" className="gap-4 rounded-3xl">
-        <View className="flex-row items-center gap-3">
-          <CategoryTile
-            category={route.category}
-            size="lg"
-            muted={activeVendors.length === 0}
-            className="bg-background"
-          />
-          <View className="flex-1 gap-0.5">
-            <Typography type="h6">{categoryLabel(route.category)}</Typography>
-            <Typography type="body-xs" color="muted">
-              {habits}
-            </Typography>
+      <Reveal>
+        <Surface variant="secondary" className="gap-4 rounded-3xl">
+          <View className="flex-row items-center gap-3">
+            <CategoryTile
+              category={route.category}
+              size="lg"
+              muted={activeVendors.length === 0}
+              className="bg-background"
+            />
+            <View className="flex-1 gap-0.5">
+              <Typography type="h6">{categoryLabel(route.category)}</Typography>
+              <Typography type="body-xs" color="muted">
+                {habits}
+              </Typography>
+            </View>
           </View>
-        </View>
 
-        <StatusBadge
-          isLive={activeVendors.length > 0}
-          label={
-            activeVendors.length > 0
-              ? `${activeVendors.length} running right now`
-              : 'Nobody running right now'
-          }
-        />
-
-        <Separator />
-
-        <View className="flex-row gap-3">
-          <StatTile icon={Ruler} value={formatDistance(routeLengthKm)} label="Route length" />
-          <StatTile
-            icon={Clock}
-            value={formatDuration(route.estimatedDurationMinutes)}
-            label="Typical trip"
+          <StatusBadge
+            isLive={activeVendors.length > 0}
+            label={
+              activeVendors.length > 0
+                ? `${activeVendors.length} running right now`
+                : 'Nobody running right now'
+            }
           />
-          <StatTile
-            icon={Wallet}
-            value={fareFrom !== null ? formatFare(fareFrom) : 'Not shared'}
-            label="Fare from"
-            colorHex={fareFrom !== null ? ICON_COLORS.fare : undefined}
-            valueClassName={fareFrom !== null ? 'text-fare' : undefined}
+
+          <Separator />
+
+          <View className="flex-row gap-3">
+            <StatTile icon={Ruler} value={formatDistance(routeLengthKm)} label="Route length" />
+            <StatTile
+              icon={Clock}
+              value={formatDuration(route.estimatedDurationMinutes)}
+              label="Typical trip"
+            />
+            <StatTile
+              icon={Wallet}
+              value={fareFrom !== null ? formatFare(fareFrom) : 'Not shared'}
+              label="Fare from"
+              colorHex={fareFrom !== null ? ICON_COLORS.fare : undefined}
+              valueClassName={fareFrom !== null ? 'text-fare' : undefined}
+            />
+          </View>
+        </Surface>
+      </Reveal>
+
+      <Reveal index={1}>
+        <View className="border-border bg-surface-secondary overflow-hidden rounded-3xl border">
+          <MapView
+            style={{ width: '100%', height: mapExpanded ? 360 : 260 }}
+            initialRegion={regionForCoordinates(route.path)}
+            showsUserLocation={status === 'granted'}
+            scrollEnabled={mapExpanded}
+            zoomEnabled={mapExpanded}
+            polylines={[
+              {
+                id: route.id,
+                coordinates: orderedPath,
+                strokeColor: activeVendors.length > 0 ? MAP_COLORS.route : MAP_COLORS.routeMuted,
+                strokeWidth: 4,
+              },
+            ]}
+            markers={markers}
           />
+
+          <Tappable
+            onPress={() => setMapExpanded((previous) => !previous)}
+            haptic="selection"
+            accessibilityLabel={mapExpanded ? 'Shrink the map' : 'Expand and pan the map'}
+            accessibilityState={{ expanded: mapExpanded }}
+            className={cn(
+              'border-border absolute top-3 right-3 h-11 w-11 items-center justify-center rounded-full border',
+              mapExpanded ? 'bg-accent border-accent' : 'bg-background',
+            )}
+          >
+            <Maximize2 color={mapExpanded ? ICON_COLORS.onBrand : MAP_COLORS.route} size={18} />
+          </Tappable>
         </View>
-      </Surface>
+      </Reveal>
 
-      <View className="border-border overflow-hidden rounded-3xl border">
-        <MapView
-          style={{ width: '100%', height: 260 }}
-          initialRegion={regionForCoordinates(route.path)}
-          showsUserLocation={status === 'granted'}
-          polylines={[
-            {
-              id: route.id,
-              coordinates: orderedPath,
-              strokeColor: activeVendors.length > 0 ? MAP_COLORS.route : MAP_COLORS.routeMuted,
-              strokeWidth: 4,
-            },
-          ]}
-          markers={markers}
-        />
-      </View>
-
-      <View className="gap-3">
+      <Reveal index={2} className="gap-3">
         <SectionHeader
           title="Vehicles on this route"
           meta={vendors.length > 0 ? `${vendors.length} registered` : undefined}
@@ -201,7 +232,7 @@ export default function RouteDetailScreen() {
             onAction={joinThisRoute}
           />
         ) : (
-          <>
+          <View className="gap-3">
             {activeVendors.length > 0 ? (
               activeVendors.map((vendor) => (
                 <VendorRow key={vendor.registration.id} route={route} vendor={vendor} />
@@ -227,33 +258,35 @@ export default function RouteDetailScreen() {
                 ))}
               </View>
             ) : null}
-          </>
+          </View>
         )}
-      </View>
+      </Reveal>
 
-      <View className="gap-3">
+      <Reveal index={3} className="gap-3">
         <SectionHeader
           title={route.stopType === 'fixed' ? 'Stops in order' : 'Route points'}
           icon={MapPin}
           meta={coordinate ? 'Distance from you' : undefined}
         />
         <StopList route={route} direction={direction} origin={coordinate} />
-      </View>
+      </Reveal>
 
       {vendors.length > 0 ? (
-        <Card variant="secondary">
-          <Card.Body className="gap-2 p-0">
-            <Card.Title>Do you run this route too?</Card.Title>
-            <Card.Description>
-              Add your vehicle and fares to this route instead of creating a duplicate.
-            </Card.Description>
-          </Card.Body>
-          <Card.Footer className="p-0 pt-3">
-            <Button variant="tertiary" onPress={joinThisRoute}>
-              <Button.Label>Join this route</Button.Label>
-            </Button>
-          </Card.Footer>
-        </Card>
+        <Reveal index={4}>
+          <Card variant="secondary">
+            <Card.Body className="gap-2 p-0">
+              <Card.Title>Do you run this route too?</Card.Title>
+              <Card.Description>
+                Add your vehicle and fares to this route instead of creating a duplicate.
+              </Card.Description>
+            </Card.Body>
+            <Card.Footer className="p-0 pt-3">
+              <Button variant="tertiary" onPress={joinThisRoute}>
+                <Button.Label>Join this route</Button.Label>
+              </Button>
+            </Card.Footer>
+          </Card>
+        </Reveal>
       ) : null}
     </ScrollView>
   );

@@ -8,9 +8,11 @@ import { EmptyState } from '@/components/EmptyState';
 import { RouteCard } from '@/components/RouteCard';
 import { RouteSearchField } from '@/components/RouteSearchField';
 import { SectionHeader } from '@/components/SectionHeader';
+import { Reveal } from '@/components/ui/Reveal';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { describeRoute, matchesQuery } from '@/lib/transport';
 import { CATEGORY_OPTIONS } from '@/lib/categories';
+import { tapFeedback } from '@/lib/haptics';
 import { ICON_COLORS } from '@/lib/mapTheme';
 import { useTransportStore } from '@/lib/store';
 import type { RouteCategory } from '@/lib/types';
@@ -49,6 +51,10 @@ export default function RoutesScreen() {
         keyExtractor={(item) => item.route.id}
         contentContainerClassName="gap-3 px-4 pb-10"
         showsVerticalScrollIndicator={false}
+        // Without this the first tap after typing is swallowed to dismiss the
+        // keyboard, so cards and chips appear to ignore the press.
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         ListHeaderComponent={
           <View className="gap-3 pt-3">
             <RouteSearchField
@@ -60,13 +66,17 @@ export default function RoutesScreen() {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
               contentContainerClassName="gap-2 pr-4"
             >
               <Chip
                 size="sm"
                 variant={liveOnly ? 'primary' : 'tertiary'}
                 color={liveOnly ? 'success' : 'default'}
-                onPress={() => setLiveOnly((previous) => !previous)}
+                onPress={() => {
+                  tapFeedback('selection');
+                  setLiveOnly((previous) => !previous);
+                }}
               >
                 <Zap color={liveOnly ? ICON_COLORS.onBrand : muted} size={13} />
                 <Chip.Label>Running now</Chip.Label>
@@ -76,7 +86,10 @@ export default function RoutesScreen() {
                 size="sm"
                 variant={category === 'all' ? 'primary' : 'tertiary'}
                 color={category === 'all' ? 'accent' : 'default'}
-                onPress={() => setCategory('all')}
+                onPress={() => {
+                  tapFeedback('selection');
+                  setCategory('all');
+                }}
               >
                 <Chip.Label>All types</Chip.Label>
               </Chip>
@@ -90,7 +103,10 @@ export default function RoutesScreen() {
                     size="sm"
                     variant={isSelected ? 'primary' : 'tertiary'}
                     color={isSelected ? 'accent' : 'default'}
-                    onPress={() => setCategory(option.value)}
+                    onPress={() => {
+                      tapFeedback('selection');
+                      setCategory(option.value);
+                    }}
                   >
                     <Icon color={isSelected ? accentForeground : muted} size={13} />
                     <Chip.Label>{option.label}</Chip.Label>
@@ -105,12 +121,16 @@ export default function RoutesScreen() {
             />
           </View>
         }
-        renderItem={({ item }) => (
-          <RouteCard
-            item={item}
-            showAccessDistance={coordinate !== null}
-            onPress={() => router.push({ pathname: '/route/[id]', params: { id: item.route.id } })}
-          />
+        renderItem={({ item, index }) => (
+          <Reveal index={index}>
+            <RouteCard
+              item={item}
+              showAccessDistance={coordinate !== null}
+              onPress={() =>
+                router.push({ pathname: '/route/[id]', params: { id: item.route.id } })
+              }
+            />
+          </Reveal>
         )}
         ListEmptyComponent={
           <EmptyState

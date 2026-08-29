@@ -16,7 +16,10 @@ import {
 import { EmptyState } from '@/components/EmptyState';
 import { FareSlabEditor } from '@/components/FareSlabEditor';
 import { StatusBadge } from '@/components/StatusBadge';
+import { Reveal } from '@/components/ui/Reveal';
 import { formatDistance, formatDuration, pathLengthKm } from '@/lib/geo';
+import { exitFlowTo } from '@/lib/navigation';
+import { tapFeedback } from '@/lib/haptics';
 import { categoryLabel, directionLabel } from '@/lib/types';
 import { findActiveJourneyForRegistration } from '@/lib/transport';
 import { useTransportStore } from '@/lib/store';
@@ -51,7 +54,7 @@ export default function ManageRegistrationScreen() {
           title="Registration not found"
           description="This registration is no longer on your account."
           actionLabel="Back to my routes"
-          onAction={() => router.replace('/vendor')}
+          onAction={() => exitFlowTo('/vendor')}
         />
       </View>
     );
@@ -74,6 +77,7 @@ export default function ManageRegistrationScreen() {
       estimatedDurationMinutes: parsedDuration,
       fareSlabs: slabs,
     });
+    tapFeedback('success');
     setSaved(true);
   };
 
@@ -196,11 +200,13 @@ export default function ManageRegistrationScreen() {
             variant={confirmingRemove ? 'danger' : 'danger-soft'}
             onPress={() => {
               if (!confirmingRemove) {
+                tapFeedback('warning');
                 setConfirmingRemove(true);
                 return;
               }
               removeRegistration(registration.id);
-              router.replace('/vendor');
+              tapFeedback('success');
+              exitFlowTo('/vendor');
             }}
           >
             <Button.Label>
@@ -208,9 +214,11 @@ export default function ManageRegistrationScreen() {
             </Button.Label>
           </Button>
           {confirmingRemove ? (
-            <Button variant="ghost" onPress={() => setConfirmingRemove(false)}>
-              <Button.Label>Cancel</Button.Label>
-            </Button>
+            <Reveal distance={6}>
+              <Button variant="ghost" onPress={() => setConfirmingRemove(false)}>
+                <Button.Label>Cancel</Button.Label>
+              </Button>
+            </Reveal>
           ) : null}
         </View>
       </ScrollView>

@@ -4,6 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useThemeColor } from 'heroui-native';
 import { useUniwind } from 'uniwind';
 
+import { TabBarIcon } from '@/components/ui/TabBarIcon';
+
 export default function TabLayout() {
   const { theme } = useUniwind();
   const [background, foreground, border, accent, muted] = useThemeColor([
@@ -31,6 +33,8 @@ export default function TabLayout() {
           tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
           tabBarActiveTintColor: accent,
           tabBarInactiveTintColor: muted,
+          // Comfortable target height for the whole tab row.
+          tabBarItemStyle: { paddingVertical: 4 },
         }}
       >
         <Tabs.Screen
@@ -38,28 +42,36 @@ export default function TabLayout() {
           options={{
             title: 'Explore',
             headerShown: false,
-            tabBarIcon: ({ color, size }) => <Compass color={color} size={size ?? 24} />,
+            tabBarIcon: ({ color, size, focused }) => (
+              <TabBarIcon icon={Compass} color={color} size={size ?? 24} focused={focused} />
+            ),
           }}
         />
         <Tabs.Screen
           name="routes"
           options={{
             title: 'Routes',
-            tabBarIcon: ({ color, size }) => <RouteIcon color={color} size={size ?? 24} />,
+            tabBarIcon: ({ color, size, focused }) => (
+              <TabBarIcon icon={RouteIcon} color={color} size={size ?? 24} focused={focused} />
+            ),
           }}
         />
         <Tabs.Screen
           name="vendor"
           options={{
             title: 'Vendor',
-            tabBarIcon: ({ color, size }) => <BusFront color={color} size={size ?? 24} />,
+            tabBarIcon: ({ color, size, focused }) => (
+              <TabBarIcon icon={BusFront} color={color} size={size ?? 24} focused={focused} />
+            ),
           }}
         />
         <Tabs.Screen
           name="profile"
           options={{
             title: 'Profile',
-            tabBarIcon: ({ color, size }) => <UserRound color={color} size={size ?? 24} />,
+            tabBarIcon: ({ color, size, focused }) => (
+              <TabBarIcon icon={UserRound} color={color} size={size ?? 24} focused={focused} />
+            ),
           }}
         />
       </Tabs>

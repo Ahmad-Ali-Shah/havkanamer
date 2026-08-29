@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Stack, router, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { CircleOff, Clock, Radio } from 'lucide-react-native';
 import { Button, Card, Surface, Typography } from 'heroui-native';
 
 import MapView from '@/components/MapView';
 import { DirectionSwitch } from '@/components/DirectionSwitch';
 import { EmptyState } from '@/components/EmptyState';
+import { Reveal } from '@/components/ui/Reveal';
 import { formatClockTime, minutesSince, regionForCoordinates } from '@/lib/geo';
-import { goBackOrReplace } from '@/lib/navigation';
+import { exitFlowTo, goBackOrReplace } from '@/lib/navigation';
+import { tapFeedback } from '@/lib/haptics';
 import { ICON_COLORS, MAP_COLORS } from '@/lib/mapTheme';
 import { directionLabel, directionPath } from '@/lib/types';
 import { findActiveJourneyForRegistration } from '@/lib/transport';
@@ -40,7 +42,7 @@ export default function JourneyScreen() {
           title="Registration not found"
           description="This vehicle is no longer registered on a route."
           actionLabel="Back to my routes"
-          onAction={() => router.replace('/vendor')}
+          onAction={() => exitFlowTo('/vendor')}
         />
       </View>
     );
@@ -136,20 +138,24 @@ export default function JourneyScreen() {
             variant={confirmingEnd ? 'danger' : 'danger-soft'}
             onPress={() => {
               if (!confirmingEnd) {
+                tapFeedback('warning');
                 setConfirmingEnd(true);
                 return;
               }
               endJourney(activeJourney.id);
               setConfirmingEnd(false);
+              tapFeedback('success');
               goBackOrReplace('/vendor');
             }}
           >
             <Button.Label>{confirmingEnd ? 'Yes, end this journey' : 'End journey'}</Button.Label>
           </Button>
           {confirmingEnd ? (
-            <Button variant="ghost" onPress={() => setConfirmingEnd(false)}>
-              <Button.Label>Keep running</Button.Label>
-            </Button>
+            <Reveal distance={6}>
+              <Button variant="ghost" onPress={() => setConfirmingEnd(false)}>
+                <Button.Label>Keep running</Button.Label>
+              </Button>
+            </Reveal>
           ) : (
             <Typography type="body-xs" color="muted" className="text-center">
               Ending the journey removes you from live results.
@@ -160,6 +166,7 @@ export default function JourneyScreen() {
         <Button
           onPress={() => {
             startJourney(registration.id, route.id, direction);
+            tapFeedback('success');
             goBackOrReplace('/vendor');
           }}
         >

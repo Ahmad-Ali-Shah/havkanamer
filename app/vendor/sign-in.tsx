@@ -12,6 +12,7 @@ import {
 } from 'heroui-native';
 
 import { goBackOrReplace } from '@/lib/navigation';
+import { tapFeedback } from '@/lib/haptics';
 import { useSessionStore } from '@/lib/store';
 
 export default function VendorSignInScreen() {
@@ -27,8 +28,12 @@ export default function VendorSignInScreen() {
 
   const handleSubmit = () => {
     setSubmitted(true);
-    if (name.trim().length < 2 || phone.replace(/\D/g, '').length < 10) return;
+    if (name.trim().length < 2 || phone.replace(/\D/g, '').length < 10) {
+      tapFeedback('warning');
+      return;
+    }
     signIn(name.trim(), phone.trim());
+    tapFeedback('success');
     goBackOrReplace('/vendor');
   };
 

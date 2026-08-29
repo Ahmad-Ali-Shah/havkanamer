@@ -5,7 +5,9 @@ import { MapPin, Trash2, Undo2 } from 'lucide-react-native';
 import { Button, Input, Surface, Typography, useThemeColor } from 'heroui-native';
 
 import MapView from '@/components/MapView';
+import { Reveal } from '@/components/ui/Reveal';
 import { pathLengthKm, formatDistance, regionForRadius } from '@/lib/geo';
+import { tapFeedback } from '@/lib/haptics';
 import { ISLAMABAD_CENTER, MAP_COLORS } from '@/lib/mapTheme';
 import { createId } from '@/lib/utils';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
@@ -37,6 +39,7 @@ export default function DrawRouteScreen() {
   const canContinue = waypoints.length >= 2 && startName.length > 1 && endName.length > 1;
 
   const addWaypoint = (point: LatLng) => {
+    tapFeedback('light');
     setWaypoints((current) => [...current, { id: createId('wp'), coordinate: point, name: '' }]);
   };
 
@@ -166,7 +169,7 @@ export default function DrawRouteScreen() {
             const role = isFirst ? 'Start' : isLast ? 'End' : `Stop ${index}`;
 
             return (
-              <View key={waypoint.id} className="gap-1.5">
+              <Reveal key={waypoint.id} index={index} className="gap-1.5">
                 <Typography type="body-xs" weight="semibold" color="muted">
                   {role}
                   {isFirst || isLast ? '' : ' (optional name)'}
@@ -183,7 +186,7 @@ export default function DrawRouteScreen() {
                   }
                   autoCapitalize="words"
                 />
-              </View>
+              </Reveal>
             );
           })
         )}

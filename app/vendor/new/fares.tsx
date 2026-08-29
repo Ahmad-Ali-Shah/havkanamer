@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
-import { router } from 'expo-router';
 import { Button, Surface, Typography } from 'heroui-native';
 
 import { FareSlabEditor } from '@/components/FareSlabEditor';
 import { formatDistance, formatDuration, pathLengthKm } from '@/lib/geo';
+import { exitFlowTo } from '@/lib/navigation';
+import { tapFeedback } from '@/lib/haptics';
 import { categoryLabel } from '@/lib/types';
 import { useRouteDraftStore } from '@/lib/routeDraft';
 import { useSessionStore, useTransportStore } from '@/lib/store';
@@ -60,7 +61,10 @@ export default function FaresScreen() {
     });
 
     resetDraft();
-    router.dismissTo('/vendor');
+    tapFeedback('success');
+    // `/vendor` is a tab route, so it is not an entry in this stack. dismissTo
+    // has no target to match and does nothing; popping then replacing works.
+    exitFlowTo('/vendor');
   };
 
   const summaryName = joinedRoute ? joinedRoute.name : draft.name;

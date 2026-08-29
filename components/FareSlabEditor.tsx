@@ -3,6 +3,8 @@ import { View } from 'react-native';
 import { Plus, X } from 'lucide-react-native';
 import { Button, Input, Typography, useThemeColor } from 'heroui-native';
 
+import { Reveal } from '@/components/ui/Reveal';
+import { tapFeedback } from '@/lib/haptics';
 import { createId } from '@/lib/utils';
 import type { FareSlab } from '@/lib/types';
 
@@ -73,7 +75,7 @@ export function FareSlabEditor({ initialSlabs, onChange }: FareSlabEditorProps) 
         const from = lowerBound(index);
 
         return (
-          <View key={row.id} className="border-border gap-2 rounded-xl border p-3">
+          <Reveal key={row.id} index={index} className="border-border gap-2 rounded-xl border p-3">
             <View className="flex-row items-center justify-between">
               <Typography type="body-xs" weight="semibold" color="muted">
                 {isLast && row.toKm.trim().length === 0
@@ -84,7 +86,10 @@ export function FareSlabEditor({ initialSlabs, onChange }: FareSlabEditorProps) 
                 <Button
                   size="sm"
                   variant="ghost"
-                  onPress={() => commit(rows.filter((candidate) => candidate.id !== row.id))}
+                  onPress={() => {
+                    tapFeedback('medium');
+                    commit(rows.filter((candidate) => candidate.id !== row.id));
+                  }}
                 >
                   <X color={muted} size={14} />
                   <Button.Label>Remove</Button.Label>
@@ -132,13 +137,16 @@ export function FareSlabEditor({ initialSlabs, onChange }: FareSlabEditorProps) 
                 />
               </View>
             </View>
-          </View>
+          </Reveal>
         );
       })}
 
       <Button
         variant="tertiary"
-        onPress={() => commit([...rows, { id: createId('slab'), toKm: '', fare: '' }])}
+        onPress={() => {
+          tapFeedback('light');
+          commit([...rows, { id: createId('slab'), toKm: '', fare: '' }]);
+        }}
       >
         <Plus color={muted} size={16} />
         <Button.Label>Add another band</Button.Label>

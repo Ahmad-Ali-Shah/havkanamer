@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { setStatusBarStyle } from 'expo-status-bar';
 import {
   LocateFixed,
   MapPinOff,
+  Maximize2,
   Radar,
   Route as RouteIcon,
   SearchX,
@@ -19,6 +20,8 @@ import { RouteCard } from '@/components/RouteCard';
 import { RouteSearchField } from '@/components/RouteSearchField';
 import { SectionHeader } from '@/components/SectionHeader';
 import { LinearGradient } from '@/components/ui/primitives/LinearGradient';
+import { Reveal } from '@/components/ui/Reveal';
+import { Tappable } from '@/components/ui/Tappable';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { describeRoute, matchesQuery } from '@/lib/transport';
 import { formatDistance, regionForRadius } from '@/lib/geo';
@@ -52,6 +55,10 @@ export default function ExploreScreen() {
   const { status, coordinate, mapCenter, request } = useCurrentLocation();
   const [radiusKm, setRadiusKm] = useState(5);
   const [query, setQuery] = useState('');
+  // The preview map sits inside the list header. Leaving its gestures on means
+  // it swallows vertical pans and the list stops scrolling, so panning is only
+  // enabled once the passenger explicitly expands the map.
+  const [mapExpanded, setMapExpanded] = useState(false);
 
   // The header bleeds into the status bar, so its icons have to invert while
   // this screen is the focused one.
@@ -119,6 +126,10 @@ export default function ExploreScreen() {
         keyExtractor={(item) => item.route.id}
         contentContainerClassName="gap-3 pb-10"
         showsVerticalScrollIndicator={false}
+        // Without this the first tap after typing is swallowed to dismiss the
+        // keyboard, so cards and buttons appear to ignore the press.
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         ListHeaderComponent={
           <View className="gap-4">
             <LinearGradient
@@ -151,24 +162,30 @@ export default function ExploreScreen() {
               />
 
               <View className="flex-row flex-wrap items-center gap-2">
-                <HeroStat icon={Zap} label={`${runningNow} vehicles running`} />
-                <HeroStat
-                  icon={RouteIcon}
-                  label={
-                    coordinate
-                      ? `${nearby.length} routes within ${radiusKm} km`
-                      : `${nearby.length} routes published`
-                  }
-                />
+                <Reveal distance={0} delay={80}>
+                  <HeroStat icon={Zap} label={`${runningNow} vehicles running`} />
+                </Reveal>
+                <Reveal distance={0} delay={140}>
+                  <HeroStat
+                    icon={RouteIcon}
+                    label={
+                      coordinate
+                        ? `${nearby.length} routes within ${radiusKm} km`
+                        : `${nearby.length} routes published`
+                    }
+                  />
+                </Reveal>
               </View>
             </LinearGradient>
 
             <View className="gap-4 px-4">
-              <View className="border-border overflow-hidden rounded-3xl border">
+              <View className="border-border bg-surface-secondary overflow-hidden rounded-3xl border">
                 <MapView
-                  style={{ width: '100%', height: 232 }}
+                  style={{ width: '100%', height: mapExpanded ? 340 : 232 }}
                   region={region}
                   showsUserLocation={status === 'granted'}
+                  scrollEnabled={mapExpanded}
+                  zoomEnabled={mapExpanded}
                   polylines={polylines}
                   markers={markers}
                   circles={
@@ -187,30 +204,52 @@ export default function ExploreScreen() {
                   }
                 />
 
-                <Pressable
-                  onPress={() => void request()}
-                  accessibilityRole="button"
-                  accessibilityLabel="Update my location"
-                  className="border-border bg-background absolute top-3 right-3 h-10 w-10 items-center justify-center rounded-full border"
-                >
-                  <LocateFixed
-                    color={status === 'granted' ? MAP_COLORS.route : MAP_COLORS.routeMuted}
-                    size={18}
-                  />
-                </Pressable>
+                <View className="absolute top-3 right-3 gap-2">
+                  <Tappable
+                    onPress={() => void request()}
+                    haptic="medium"
+                    accessibilityLabel="Update my location"
+                    className="border-border bg-background h-11 w-11 items-center justify-center rounded-full border"
+                  >
+                    <LocateFixed
+                      color={status === 'granted' ? MAP_COLORS.route : MAP_COLORS.routeMuted}
+                      size={19}
+                    />
+                  </Tappable>
+
+                  <Tappable
+                    onPress={() => setMapExpanded((previous) => !previous)}
+                    haptic="selection"
+                    accessibilityLabel={mapExpanded ? 'Shrink the map' : 'Expand and pan the map'}
+                    accessibilityState={{ expanded: mapExpanded }}
+                    className={cn(
+                      'border-border h-11 w-11 items-center justify-center rounded-full border',
+                      mapExpanded ? 'bg-accent border-accent' : 'bg-background',
+                    )}
+                  >
+                    <Maximize2
+                      color={mapExpanded ? ICON_COLORS.onBrand : MAP_COLORS.route}
+                      size={18}
+                    />
+                  </Tappable>
+                </View>
 
                 <View className="border-border bg-background absolute right-3 bottom-3 left-3 flex-row items-center gap-1 rounded-full border p-1">
                   {RADIUS_OPTIONS.map((option) => {
                     const isSelected = option === radiusKm;
                     return (
-                      <Pressable
+                      <Tappable
                         key={option}
                         onPress={() => setRadiusKm(option)}
-                        accessibilityRole="button"
+                        haptic="selection"
+                        pressedScale={0.93}
+                        // Adjacent pills: horizontal slop would overlap the
+                        // neighbour and select the wrong radius near the edge.
+                        hitSlop={{ top: 8, bottom: 8 }}
                         accessibilityState={{ selected: isSelected }}
                         accessibilityLabel={`Search within ${option} kilometres`}
                         className={cn(
-                          'flex-1 items-center rounded-full py-1.5',
+                          'min-h-9 flex-1 items-center justify-center rounded-full py-2',
                           isSelected ? 'bg-accent' : 'bg-transparent',
                         )}
                       >
@@ -221,7 +260,7 @@ export default function ExploreScreen() {
                         >
                           {option} km
                         </Typography>
-                      </Pressable>
+                      </Tappable>
                     );
                   })}
                 </View>
@@ -237,31 +276,33 @@ export default function ExploreScreen() {
               ) : null}
 
               {status === 'denied' || status === 'unavailable' ? (
-                <View className="border-border bg-surface-secondary gap-3 rounded-2xl border p-4">
-                  <View className="flex-row items-center gap-2">
-                    <MapPinOff color={MAP_COLORS.routeDraft} size={18} />
-                    <Typography type="body" weight="semibold">
-                      Location is off
+                <Reveal>
+                  <View className="border-border bg-surface-secondary gap-3 rounded-2xl border p-4">
+                    <View className="flex-row items-center gap-2">
+                      <MapPinOff color={MAP_COLORS.routeDraft} size={18} />
+                      <Typography type="body" weight="semibold">
+                        Location is off
+                      </Typography>
+                    </View>
+                    <Typography type="body-sm" color="muted">
+                      Distances to pickup points need your location. You can still browse every
+                      published route without it.
                     </Typography>
+                    <View className="flex-row gap-2">
+                      <Button size="sm" className="flex-1" onPress={() => void request()}>
+                        <Button.Label>Turn on location</Button.Label>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="tertiary"
+                        className="flex-1"
+                        onPress={() => router.push('/routes')}
+                      >
+                        <Button.Label>Browse all</Button.Label>
+                      </Button>
+                    </View>
                   </View>
-                  <Typography type="body-sm" color="muted">
-                    Distances to pickup points need your location. You can still browse every
-                    published route without it.
-                  </Typography>
-                  <View className="flex-row gap-2">
-                    <Button size="sm" className="flex-1" onPress={() => void request()}>
-                      <Button.Label>Turn on location</Button.Label>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="tertiary"
-                      className="flex-1"
-                      onPress={() => router.push('/routes')}
-                    >
-                      <Button.Label>Browse all</Button.Label>
-                    </Button>
-                  </View>
-                </View>
+                </Reveal>
               ) : null}
 
               {nearby.length > 0 ? (
@@ -273,8 +314,8 @@ export default function ExploreScreen() {
             </View>
           </View>
         }
-        renderItem={({ item }) => (
-          <View className="px-4">
+        renderItem={({ item, index }) => (
+          <Reveal index={index} className="px-4">
             <RouteCard
               item={item}
               showAccessDistance={coordinate !== null}
@@ -282,7 +323,7 @@ export default function ExploreScreen() {
                 router.push({ pathname: '/route/[id]', params: { id: item.route.id } })
               }
             />
-          </View>
+          </Reveal>
         )}
         ListEmptyComponent={
           query.trim().length > 0 ? (

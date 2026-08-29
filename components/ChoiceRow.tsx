@@ -2,6 +2,8 @@ import type { LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
 import { Chip, Typography, useThemeColor } from 'heroui-native';
 
+import { tapFeedback } from '@/lib/haptics';
+
 export interface ChoiceOption<T extends string> {
   value: T;
   label: string;
@@ -47,7 +49,11 @@ export function ChoiceRow<T extends string>({
               size="sm"
               variant={isSelected ? 'primary' : 'tertiary'}
               color={isSelected ? 'accent' : 'default'}
-              onPress={() => onChange(option.value)}
+              onPress={() => {
+                tapFeedback('selection');
+                onChange(option.value);
+              }}
+              accessibilityState={{ selected: isSelected }}
             >
               {Icon ? <Icon color={isSelected ? accentForeground : muted} size={13} /> : null}
               <Chip.Label>{option.label}</Chip.Label>
