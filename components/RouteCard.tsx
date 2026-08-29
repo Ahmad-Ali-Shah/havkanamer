@@ -1,9 +1,12 @@
-import { ArrowRight, Clock, Footprints, Users } from 'lucide-react-native';
+import { Clock, Footprints, Wallet } from 'lucide-react-native';
 import { View } from 'react-native';
-import { Card, Chip, PressableFeedback, Typography, useThemeColor } from 'heroui-native';
+import { Card, PressableFeedback, Typography } from 'heroui-native';
 
+import { CategoryTile } from '@/components/CategoryTile';
+import { IconStat } from '@/components/Stat';
 import { RoutePathPreview } from '@/components/RoutePathPreview';
 import { StatusBadge } from '@/components/StatusBadge';
+import { ICON_COLORS } from '@/lib/mapTheme';
 import { formatDistance, formatDuration, formatFare } from '@/lib/geo';
 import { categoryLabel } from '@/lib/types';
 import type { NearbyRoute } from '@/lib/transport';
@@ -16,71 +19,66 @@ interface RouteCardProps {
 }
 
 export function RouteCard({ item, onPress, showAccessDistance = true }: RouteCardProps) {
-  const [muted] = useThemeColor(['muted']);
   const { route } = item;
   const isLive = item.activeVendorCount > 0;
 
+  // The route name already spells out the corridor, so the subtitle carries
+  // what the name cannot: the vehicle type and how it stops.
+  const subtitle = [
+    categoryLabel(route.category),
+    route.stopType === 'fixed' ? `${route.stops.length} stops` : 'stops anywhere',
+  ].join(' · ');
+
   return (
-    <PressableFeedback onPress={onPress}>
+    <PressableFeedback onPress={onPress} accessibilityRole="button" accessibilityLabel={route.name}>
       <Card className="gap-3">
         <Card.Body className="gap-3 p-0">
-          <View className="flex-row items-start justify-between gap-3">
-            <View className="flex-1 gap-1">
+          <View className="flex-row items-center gap-3">
+            <CategoryTile category={route.category} muted={!isLive} />
+
+            <View className="flex-1 gap-0.5">
               <Typography type="h6" numberOfLines={1}>
                 {route.name}
               </Typography>
-              <View className="flex-row items-center gap-1.5">
-                <Typography type="body-sm" color="muted" numberOfLines={1} className="flex-shrink">
-                  {route.start.name}
-                </Typography>
-                <ArrowRight color={muted} size={13} />
-                <Typography type="body-sm" color="muted" numberOfLines={1} className="flex-shrink">
-                  {route.end.name}
-                </Typography>
-              </View>
+              <Typography type="body-xs" color="muted" numberOfLines={1}>
+                {subtitle}
+              </Typography>
             </View>
-            <RoutePathPreview path={route.path} muted={!isLive} className="w-24" />
+
+            <RoutePathPreview path={route.path} muted={!isLive} className="w-16" />
           </View>
 
-          <View className="flex-row flex-wrap items-center gap-2">
+          <View className="flex-row flex-wrap items-center gap-x-3 gap-y-2">
             <StatusBadge
               isLive={isLive}
               label={
                 isLive
-                  ? `${item.activeVendorCount} operating now`
+                  ? `${item.activeVendorCount} running`
                   : item.registeredVendorCount > 0
-                    ? 'Nobody operating'
-                    : 'No vendors yet'
+                    ? 'Not running'
+                    : 'No vehicles yet'
               }
             />
-            <Chip size="sm" variant="tertiary" color="default">
-              <Chip.Label>{categoryLabel(route.category)}</Chip.Label>
-            </Chip>
-          </View>
 
-          <View className="flex-row flex-wrap items-center gap-x-4 gap-y-1.5">
             {showAccessDistance ? (
-              <View className="flex-row items-center gap-1.5">
-                <Footprints color={muted} size={14} />
-                <Typography type="body-xs" color="muted">
-                  {formatDistance(item.accessDistanceKm)} away
-                  {item.nearestStopName ? ` · ${item.nearestStopName}` : ''}
-                </Typography>
-              </View>
+              <IconStat
+                icon={Footprints}
+                label={`${formatDistance(item.accessDistanceKm)} away${
+                  item.nearestStopName ? ` · ${item.nearestStopName}` : ''
+                }`}
+                className="flex-shrink"
+              />
             ) : null}
-            <View className="flex-row items-center gap-1.5">
-              <Clock color={muted} size={14} />
-              <Typography type="body-xs" color="muted">
-                {formatDuration(route.estimatedDurationMinutes)}
-              </Typography>
-            </View>
+
+            <IconStat icon={Clock} label={formatDuration(route.estimatedDurationMinutes)} />
+
             {item.fareFrom !== null ? (
-              <View className="flex-row items-center gap-1.5">
-                <Users color={muted} size={14} />
-                <Typography type="body-xs" color="muted">
-                  from {formatFare(item.fareFrom)}
-                </Typography>
-              </View>
+              <IconStat
+                icon={Wallet}
+                label={`from ${formatFare(item.fareFrom)}`}
+                colorHex={ICON_COLORS.fare}
+                textClassName="text-fare font-medium"
+              />
             ) : null}
           </View>
         </Card.Body>

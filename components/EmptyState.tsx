@@ -21,12 +21,12 @@ export function EmptyState({
   secondaryActionLabel,
   onSecondaryAction,
 }: EmptyStateProps) {
-  const [muted] = useThemeColor(['muted']);
+  const [accent] = useThemeColor(['accent']);
 
   return (
     <View className="items-center gap-3 px-6 py-10">
-      <View className="bg-surface-secondary h-14 w-14 items-center justify-center rounded-full">
-        <Icon color={muted} size={26} />
+      <View className="bg-route-surface h-16 w-16 items-center justify-center rounded-3xl">
+        <Icon color={accent} size={28} />
       </View>
       <Typography type="h5" align="center">
         {title}

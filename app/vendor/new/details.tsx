@@ -5,7 +5,7 @@ import { Button, Description, Input, Label, Surface, TextField, Typography } fro
 
 import { ChoiceRow } from '@/components/ChoiceRow';
 import { formatDistance, pathLengthKm } from '@/lib/geo';
-import { ROUTE_CATEGORIES } from '@/lib/types';
+import { CATEGORY_OPTIONS } from '@/lib/categories';
 import { useRouteDraftStore } from '@/lib/routeDraft';
 import type { DirectionType, RouteCategory, StopType } from '@/lib/types';
 
@@ -83,7 +83,7 @@ export default function RouteDetailsScreen() {
 
         <ChoiceRow
           label="Vehicle type"
-          options={ROUTE_CATEGORIES}
+          options={CATEGORY_OPTIONS}
           value={category}
           onChange={setCategory}
         />

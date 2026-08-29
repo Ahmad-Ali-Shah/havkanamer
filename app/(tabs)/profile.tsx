@@ -1,8 +1,9 @@
-import { RotateCcw, UserRound } from 'lucide-react-native';
+import { Database, Info, RotateCcw, UserRound } from 'lucide-react-native';
 import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { Button, Card, Separator, Surface, Typography, useThemeColor } from 'heroui-native';
 
+import { SectionHeader } from '@/components/SectionHeader';
 import { ICON_COLORS } from '@/lib/mapTheme';
 import { registrationsForAccount } from '@/lib/transport';
 import { useSessionStore, useTransportStore } from '@/lib/store';
@@ -74,7 +75,7 @@ export default function ProfileScreen() {
       ) : null}
 
       <View className="gap-2">
-        <Typography type="h6">About this app</Typography>
+        <SectionHeader title="About this app" icon={Info} />
         <Typography type="body-sm" color="muted">
           Local vans, wagons and shuttles run fixed routes every day, but almost none of them exist
           online. Vendors publish the routes they already drive; passengers nearby can finally
@@ -86,7 +87,7 @@ export default function ProfileScreen() {
       </View>
 
       <View className="gap-2">
-        <Typography type="h6">Demo data</Typography>
+        <SectionHeader title="Demo data" icon={Database} />
         <Typography type="body-sm" color="muted">
           Routes, vendors and journeys are stored on this device. Resetting restores the seeded
           Islamabad routes and clears anything you published.

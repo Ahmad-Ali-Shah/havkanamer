@@ -3,7 +3,9 @@ import { ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { Button, Card, PressableFeedback, Surface, Typography, useThemeColor } from 'heroui-native';
 
+import { CategoryTile } from '@/components/CategoryTile';
 import { EmptyState } from '@/components/EmptyState';
+import { SectionHeader } from '@/components/SectionHeader';
 import { StatusBadge } from '@/components/StatusBadge';
 import { formatFare, minutesSince, startingFare } from '@/lib/geo';
 import { directionLabel } from '@/lib/types';
@@ -41,11 +43,11 @@ export default function VendorScreen() {
         </Card>
 
         <View className="gap-3">
-          <Typography type="h6">How it works</Typography>
+          <SectionHeader title="How it works" />
           {[
             'Draw your route on the map, or join a route someone already published.',
             'Add your vehicle, trip time and fare slabs.',
-            'Start a journey when you set off so passengers see you are operating.',
+            'Start a journey when you set off so passengers can see you are running.',
           ].map((line, index) => (
             <Surface key={line} variant="secondary" className="flex-row items-start gap-3">
               <View className="bg-accent h-6 w-6 items-center justify-center rounded-full">
@@ -120,8 +122,10 @@ export default function VendorScreen() {
       </View>
 
       <View className="gap-3">
-        <Typography type="h6">My routes</Typography>
-
+        <SectionHeader
+          title="My routes"
+          meta={myRegistrations.length > 0 ? `${myRegistrations.length} registered` : undefined}
+        />
         {myRegistrations.length === 0 ? (
           <EmptyState
             icon={RouteIcon}
@@ -143,12 +147,13 @@ export default function VendorScreen() {
             return (
               <Card key={registration.id}>
                 <Card.Body className="gap-3 p-0">
-                  <View className="flex-row items-start justify-between gap-3">
+                  <View className="flex-row items-center justify-between gap-3">
+                    <CategoryTile category={route.category} size="sm" muted={journey === null} />
                     <View className="flex-1">
                       <Typography type="body" weight="semibold" numberOfLines={1}>
                         {route.name}
                       </Typography>
-                      <Typography type="body-xs" color="muted">
+                      <Typography type="body-xs" color="muted" numberOfLines={1}>
                         {registration.vehicleRegistration}
                         {fareFrom !== null ? ` · from ${formatFare(fareFrom)}` : ''}
                       </Typography>

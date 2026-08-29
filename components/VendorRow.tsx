@@ -1,10 +1,12 @@
-import { Phone } from 'lucide-react-native';
+import { Footprints, PhoneCall, Timer } from 'lucide-react-native';
 import { Linking, View } from 'react-native';
 import { Button, Card, Typography, useThemeColor } from 'heroui-native';
 
 import { FareSlabTable } from '@/components/FareSlabTable';
+import { IconStat } from '@/components/Stat';
 import { StatusBadge } from '@/components/StatusBadge';
-import { formatDuration, formatFare, minutesSince, startingFare } from '@/lib/geo';
+import { ICON_COLORS } from '@/lib/mapTheme';
+import { formatDuration, minutesSince } from '@/lib/geo';
 import { directionLabel } from '@/lib/types';
 import type { RouteVendor } from '@/lib/transport';
 import type { TransportRoute } from '@/lib/types';
@@ -17,9 +19,9 @@ interface VendorRowProps {
 }
 
 export function VendorRow({ route, vendor, showFares = true }: VendorRowProps) {
-  const [muted] = useThemeColor(['muted']);
+  const [muted, accentForeground] = useThemeColor(['muted', 'accent-foreground']);
   const { registration, activeJourney } = vendor;
-  const fareFrom = startingFare(registration.fareSlabs);
+  const isLive = activeJourney !== null;
 
   return (
     <Card className="gap-3">
@@ -33,45 +35,45 @@ export function VendorRow({ route, vendor, showFares = true }: VendorRowProps) {
               {registration.vehicleRegistration} · {registration.vehicleDetails}
             </Typography>
           </View>
-          <StatusBadge isLive={activeJourney !== null} />
+          <StatusBadge isLive={isLive} />
         </View>
 
         {activeJourney ? (
-          <View className="bg-live-surface rounded-xl px-3 py-2">
+          <View className="bg-live-surface gap-0.5 rounded-xl px-3 py-2">
             <Typography type="body-xs" weight="semibold" className="text-live">
               {directionLabel(route, activeJourney.direction)}
             </Typography>
-            <Typography type="body-xs" className="text-live">
-              Started {minutesSince(activeJourney.startedAt)} min ago
-            </Typography>
+            <IconStat
+              icon={Timer}
+              label={`Set off ${minutesSince(activeJourney.startedAt)} min ago`}
+              colorHex={ICON_COLORS.live}
+              textClassName="text-live"
+            />
           </View>
         ) : null}
 
         <View className="flex-row flex-wrap items-center gap-x-4 gap-y-1">
-          <Typography type="body-xs" color="muted">
-            Trip {formatDuration(registration.estimatedDurationMinutes)}
-          </Typography>
-          <Typography type="body-xs" color="muted">
-            {registration.stopType === 'fixed' ? 'Fixed stops' : 'Flexible stops'}
-          </Typography>
-          {fareFrom !== null ? (
-            <Typography type="body-xs" color="muted">
-              Fare from {formatFare(fareFrom)}
-            </Typography>
-          ) : null}
+          <IconStat
+            icon={Timer}
+            label={`Their trip ${formatDuration(registration.estimatedDurationMinutes)}`}
+          />
+          <IconStat
+            icon={Footprints}
+            label={registration.stopType === 'fixed' ? 'Stops at fixed points' : 'Stops on request'}
+          />
         </View>
 
         {showFares ? <FareSlabTable slabs={registration.fareSlabs} /> : null}
 
         <Button
           size="sm"
-          variant="tertiary"
+          variant={isLive ? 'primary' : 'tertiary'}
           onPress={() => {
             void Linking.openURL(`tel:${registration.contact.replace(/\s+/g, '')}`);
           }}
         >
-          <Phone color={muted} size={15} />
-          <Button.Label>{registration.contact}</Button.Label>
+          <PhoneCall color={isLive ? accentForeground : muted} size={15} />
+          <Button.Label>Call {registration.contact}</Button.Label>
         </Button>
       </Card.Body>
     </Card>

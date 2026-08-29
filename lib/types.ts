@@ -82,16 +82,6 @@ export interface Account {
   phone: string;
 }
 
-export const ROUTE_CATEGORIES: { value: RouteCategory; label: string }[] = [
-  { value: 'wagon', label: 'Wagon' },
-  { value: 'van', label: 'Van' },
-  { value: 'coaster', label: 'Coaster' },
-  { value: 'rickshaw', label: 'Rickshaw route' },
-  { value: 'shuttle', label: 'Shuttle' },
-  { value: 'university', label: 'University transport' },
-  { value: 'other', label: 'Other local transport' },
-];
-
 const CATEGORY_LABELS: Record<RouteCategory, string> = {
   wagon: 'Wagon',
   van: 'Van',
@@ -101,6 +91,21 @@ const CATEGORY_LABELS: Record<RouteCategory, string> = {
   university: 'University transport',
   other: 'Other local transport',
 };
+
+/** Selection order for pickers and filters, derived from the single label map. */
+const CATEGORY_ORDER: RouteCategory[] = [
+  'wagon',
+  'van',
+  'coaster',
+  'rickshaw',
+  'shuttle',
+  'university',
+  'other',
+];
+
+export const ROUTE_CATEGORIES: { value: RouteCategory; label: string }[] = CATEGORY_ORDER.map(
+  (value) => ({ value, label: CATEGORY_LABELS[value] }),
+);
 
 export function categoryLabel(category: RouteCategory) {
   return CATEGORY_LABELS[category];

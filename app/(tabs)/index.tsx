@@ -1,22 +1,48 @@
-import { useMemo, useState } from 'react';
-import { FlatList, View } from 'react-native';
-import { Link, router } from 'expo-router';
-import { MapPinOff, Navigation, SearchX } from 'lucide-react-native';
-import { Chip, Spinner, Typography } from 'heroui-native';
+import { useCallback, useMemo, useState } from 'react';
+import { FlatList, Pressable, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { setStatusBarStyle } from 'expo-status-bar';
+import {
+  LocateFixed,
+  MapPinOff,
+  Radar,
+  Route as RouteIcon,
+  SearchX,
+  Zap,
+} from 'lucide-react-native';
+import type { LucideIcon } from 'lucide-react-native';
+import { Button, Spinner, Typography } from 'heroui-native';
 
 import MapView from '@/components/MapView';
 import { EmptyState } from '@/components/EmptyState';
 import { RouteCard } from '@/components/RouteCard';
 import { RouteSearchField } from '@/components/RouteSearchField';
-import { SafeAreaView } from '@/components/ui/primitives/SafeAreaView';
+import { SectionHeader } from '@/components/SectionHeader';
+import { LinearGradient } from '@/components/ui/primitives/LinearGradient';
 import { useCurrentLocation } from '@/hooks/useCurrentLocation';
 import { describeRoute, matchesQuery } from '@/lib/transport';
 import { formatDistance, regionForRadius } from '@/lib/geo';
-import { MAP_COLORS } from '@/lib/mapTheme';
+import { HERO_GRADIENT, ICON_COLORS, MAP_COLORS, ON_BRAND_SURFACE } from '@/lib/mapTheme';
 import { useTransportStore } from '@/lib/store';
+import { cn } from '@/lib/utils';
 import type { MapMarker, MapPolyline } from '@/components/MapView.types';
 
 const RADIUS_OPTIONS = [1, 2, 5, 10];
+
+/** Summary pill that sits on top of the gradient header. */
+function HeroStat({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
+  return (
+    <View
+      className="flex-row items-center gap-1.5 rounded-full px-3 py-1.5"
+      style={{ backgroundColor: ON_BRAND_SURFACE }}
+    >
+      <Icon color={ICON_COLORS.onBrand} size={13} />
+      <Typography type="body-xs" weight="semibold" className="text-white">
+        {label}
+      </Typography>
+    </View>
+  );
+}
 
 export default function ExploreScreen() {
   const routes = useTransportStore((state) => state.routes);
@@ -26,6 +52,15 @@ export default function ExploreScreen() {
   const { status, coordinate, mapCenter, request } = useCurrentLocation();
   const [radiusKm, setRadiusKm] = useState(5);
   const [query, setQuery] = useState('');
+
+  // The header bleeds into the status bar, so its icons have to invert while
+  // this screen is the focused one.
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle('light');
+      return () => setStatusBarStyle('dark');
+    }, []),
+  );
 
   const nearby = useMemo(() => {
     const described = routes
@@ -43,6 +78,11 @@ export default function ExploreScreen() {
       return a.accessDistanceKm - b.accessDistanceKm;
     });
   }, [routes, registrations, journeys, coordinate, radiusKm, query]);
+
+  const runningNow = useMemo(
+    () => nearby.reduce((total, item) => total + item.activeVendorCount, 0),
+    [nearby],
+  );
 
   const polylines = useMemo<MapPolyline[]>(
     () =>
@@ -73,119 +113,176 @@ export default function ExploreScreen() {
   const region = useMemo(() => regionForRadius(mapCenter, radiusKm), [mapCenter, radiusKm]);
 
   return (
-    <SafeAreaView className="bg-background flex-1" edges={['top']}>
+    <View className="bg-background flex-1">
       <FlatList
         data={nearby}
         keyExtractor={(item) => item.route.id}
-        contentContainerClassName="gap-3 px-4 pb-8"
+        contentContainerClassName="gap-3 pb-10"
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={
-          <View className="gap-4 pb-1">
-            <View className="gap-1 pt-2">
-              <Typography type="h3">Transport near you</Typography>
-              <Typography type="body-sm" color="muted">
-                {status === 'granted'
-                  ? 'Local routes passing within your chosen radius.'
-                  : 'Showing Islamabad routes. Enable location for accurate distances.'}
-              </Typography>
-            </View>
-
-            <RouteSearchField
-              value={query}
-              onChange={setQuery}
-              placeholder="Where do you want to go?"
-            />
-
-            <View className="border-border overflow-hidden rounded-2xl border">
-              <MapView
-                style={{ width: '100%', height: 240 }}
-                region={region}
-                showsUserLocation={status === 'granted'}
-                polylines={polylines}
-                markers={markers}
-                circles={
-                  coordinate
-                    ? [
-                        {
-                          id: 'radius',
-                          center: coordinate,
-                          radius: radiusKm * 1000,
-                          fillColor: MAP_COLORS.radiusFill,
-                          strokeColor: MAP_COLORS.radiusStroke,
-                          strokeWidth: 1.5,
-                        },
-                      ]
-                    : []
-                }
-              />
-            </View>
-
-            <View className="flex-row items-center gap-2">
-              <Typography type="body-xs" color="muted">
-                Radius
-              </Typography>
-              {RADIUS_OPTIONS.map((option) => (
-                <Chip
-                  key={option}
-                  size="sm"
-                  variant={option === radiusKm ? 'primary' : 'tertiary'}
-                  color={option === radiusKm ? 'accent' : 'default'}
-                  onPress={() => setRadiusKm(option)}
-                >
-                  <Chip.Label>{option} km</Chip.Label>
-                </Chip>
-              ))}
-            </View>
-
-            {status === 'loading' ? (
-              <View className="bg-surface-secondary flex-row items-center gap-2 rounded-xl px-3 py-3">
-                <Spinner size="sm" />
-                <Typography type="body-sm" color="muted">
-                  Finding your location…
-                </Typography>
-              </View>
-            ) : null}
-
-            {status === 'denied' || status === 'unavailable' ? (
-              <View className="border-border bg-surface-secondary gap-2 rounded-2xl border p-4">
-                <View className="flex-row items-center gap-2">
-                  <MapPinOff color={MAP_COLORS.routeDraft} size={18} />
-                  <Typography type="body" weight="semibold">
-                    Location is off
+          <View className="gap-4">
+            <LinearGradient
+              colors={HERO_GRADIENT}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              className="pt-safe-offset-4 gap-4 rounded-b-[32px] px-4 pb-6"
+            >
+              <View className="gap-1">
+                <View className="flex-row items-center gap-1.5">
+                  <Radar color={ICON_COLORS.onBrand} size={14} />
+                  <Typography
+                    type="body-xs"
+                    weight="semibold"
+                    className="tracking-wide text-white uppercase"
+                  >
+                    Transport near you
                   </Typography>
                 </View>
-                <Typography type="body-sm" color="muted">
-                  Without location we cannot measure how far a pickup point is. You can still browse
-                  every published route.
+                <Typography type="h3" className="text-white">
+                  Where are you going?
                 </Typography>
-                <View className="flex-row flex-wrap gap-2 pt-1">
-                  <Chip size="sm" onPress={() => void request()}>
-                    <Navigation color="#FFFFFF" size={13} />
-                    <Chip.Label>Enable location</Chip.Label>
-                  </Chip>
-                  <Link href="/routes" asChild>
-                    <Chip size="sm" variant="tertiary" color="default">
-                      <Chip.Label>Browse all routes</Chip.Label>
-                    </Chip>
-                  </Link>
+              </View>
+
+              <RouteSearchField
+                value={query}
+                onChange={setQuery}
+                placeholder="Sector, stop or landmark"
+                className="bg-background"
+              />
+
+              <View className="flex-row flex-wrap items-center gap-2">
+                <HeroStat icon={Zap} label={`${runningNow} vehicles running`} />
+                <HeroStat
+                  icon={RouteIcon}
+                  label={
+                    coordinate
+                      ? `${nearby.length} routes within ${radiusKm} km`
+                      : `${nearby.length} routes published`
+                  }
+                />
+              </View>
+            </LinearGradient>
+
+            <View className="gap-4 px-4">
+              <View className="border-border overflow-hidden rounded-3xl border">
+                <MapView
+                  style={{ width: '100%', height: 232 }}
+                  region={region}
+                  showsUserLocation={status === 'granted'}
+                  polylines={polylines}
+                  markers={markers}
+                  circles={
+                    coordinate
+                      ? [
+                          {
+                            id: 'radius',
+                            center: coordinate,
+                            radius: radiusKm * 1000,
+                            fillColor: MAP_COLORS.radiusFill,
+                            strokeColor: MAP_COLORS.radiusStroke,
+                            strokeWidth: 1.5,
+                          },
+                        ]
+                      : []
+                  }
+                />
+
+                <Pressable
+                  onPress={() => void request()}
+                  accessibilityRole="button"
+                  accessibilityLabel="Update my location"
+                  className="border-border bg-background absolute top-3 right-3 h-10 w-10 items-center justify-center rounded-full border"
+                >
+                  <LocateFixed
+                    color={status === 'granted' ? MAP_COLORS.route : MAP_COLORS.routeMuted}
+                    size={18}
+                  />
+                </Pressable>
+
+                <View className="border-border bg-background absolute right-3 bottom-3 left-3 flex-row items-center gap-1 rounded-full border p-1">
+                  {RADIUS_OPTIONS.map((option) => {
+                    const isSelected = option === radiusKm;
+                    return (
+                      <Pressable
+                        key={option}
+                        onPress={() => setRadiusKm(option)}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: isSelected }}
+                        accessibilityLabel={`Search within ${option} kilometres`}
+                        className={cn(
+                          'flex-1 items-center rounded-full py-1.5',
+                          isSelected ? 'bg-accent' : 'bg-transparent',
+                        )}
+                      >
+                        <Typography
+                          type="body-xs"
+                          weight="semibold"
+                          className={isSelected ? 'text-accent-foreground' : 'text-muted'}
+                        >
+                          {option} km
+                        </Typography>
+                      </Pressable>
+                    );
+                  })}
                 </View>
               </View>
-            ) : null}
 
-            {nearby.length > 0 ? (
-              <Typography type="body-sm" weight="semibold">
-                {nearby.length} {nearby.length === 1 ? 'route' : 'routes'}
-                {coordinate ? ` within ${radiusKm} km` : ''}
-              </Typography>
-            ) : null}
+              {status === 'loading' ? (
+                <View className="bg-surface-secondary flex-row items-center gap-2 rounded-2xl px-4 py-3">
+                  <Spinner size="sm" />
+                  <Typography type="body-sm" color="muted">
+                    Finding your location…
+                  </Typography>
+                </View>
+              ) : null}
+
+              {status === 'denied' || status === 'unavailable' ? (
+                <View className="border-border bg-surface-secondary gap-3 rounded-2xl border p-4">
+                  <View className="flex-row items-center gap-2">
+                    <MapPinOff color={MAP_COLORS.routeDraft} size={18} />
+                    <Typography type="body" weight="semibold">
+                      Location is off
+                    </Typography>
+                  </View>
+                  <Typography type="body-sm" color="muted">
+                    Distances to pickup points need your location. You can still browse every
+                    published route without it.
+                  </Typography>
+                  <View className="flex-row gap-2">
+                    <Button size="sm" className="flex-1" onPress={() => void request()}>
+                      <Button.Label>Turn on location</Button.Label>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="tertiary"
+                      className="flex-1"
+                      onPress={() => router.push('/routes')}
+                    >
+                      <Button.Label>Browse all</Button.Label>
+                    </Button>
+                  </View>
+                </View>
+              ) : null}
+
+              {nearby.length > 0 ? (
+                <SectionHeader
+                  title="Routes you can catch"
+                  meta={coordinate ? 'Running first, then nearest' : 'Running first'}
+                />
+              ) : null}
+            </View>
           </View>
         }
         renderItem={({ item }) => (
-          <RouteCard
-            item={item}
-            showAccessDistance={coordinate !== null}
-            onPress={() => router.push({ pathname: '/route/[id]', params: { id: item.route.id } })}
-          />
+          <View className="px-4">
+            <RouteCard
+              item={item}
+              showAccessDistance={coordinate !== null}
+              onPress={() =>
+                router.push({ pathname: '/route/[id]', params: { id: item.route.id } })
+              }
+            />
+          </View>
         )}
         ListEmptyComponent={
           query.trim().length > 0 ? (
@@ -212,6 +309,6 @@ export default function ExploreScreen() {
           )
         }
       />
-    </SafeAreaView>
+    </View>
   );
 }
